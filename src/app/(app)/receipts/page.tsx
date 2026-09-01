@@ -1,6 +1,6 @@
 import { receipts as receiptTable, expensesForYear } from '@/lib/repository';
 import { resolveYear } from '@/lib/year';
-import { formatBytes, formatDate, formatMoney } from '@/lib/format';
+import { formatBytes, formatDate, formatMoney, today } from '@/lib/format';
 import { ViewerNotice, PageHeader, EmptyState, ErrorNotice } from '@/components/ui/primitives';
 import { ReceiptUploadPanel } from '@/components/receipt-upload-panel';
 import { currentUser, canEdit, canViewReceipts } from '@/lib/auth';
@@ -29,7 +29,7 @@ export default async function ReceiptsPage({
   const forYear = rows
     .filter((row) => row.year === year)
     .map((row) => redactReceipt(row, role, member?.email))
-    .sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
+    .sort((a, b) => b.date.localeCompare(a.date));
   const expenseName = new Map(expenseRows.map((row) => [row.id, row.description]));
   const totalSize = forYear.reduce((sum, row) => sum + row.sizeBytes, 0);
   const attached = new Set(forYear.map((row) => row.expenseId).filter(Boolean));
@@ -62,7 +62,7 @@ export default async function ReceiptsPage({
       {editable ? (
         <div className="mb-8">
           <ReceiptUploadPanel
-            year={year}
+            today={today()}
             expenses={expenseRows.map((row) => ({ id: row.id, label: row.description }))}
           />
         </div>
@@ -128,8 +128,7 @@ export default async function ReceiptsPage({
                       : 'Unattached'}
                   </p>
                   <p className="mt-2 text-xs text-faint">
-                    {formatBytes(receipt.sizeBytes)} ·{' '}
-                    {receipt.uploadedAt ? formatDate(receipt.uploadedAt.slice(0, 10)) : '—'}
+                    {formatBytes(receipt.sizeBytes)} · {formatDate(receipt.date)}
                   </p>
                 </div>
               </li>

@@ -1,4 +1,7 @@
+import Image from 'next/image';
 import { signIn } from '@/lib/auth';
+import { ToastProvider } from '@/components/toast';
+import { RequestAccessForm } from '@/components/request-access-form';
 
 export default async function SignInPage({
   searchParams,
@@ -8,50 +11,61 @@ export default async function SignInPage({
   const { error } = await searchParams;
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_40rem_at_50%_-10%,rgb(var(--brand)/0.14),transparent)]"
-      />
+    <ToastProvider>
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_40rem_at_50%_-10%,rgb(var(--brand)/0.14),transparent)]"
+        />
 
-      <div className="relative w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <span aria-hidden className="text-5xl">
-            🕉️
-          </span>
-          <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight">
-            Ganesha Chaturthi
-          </h1>
-          <p className="mt-1.5 text-sm text-muted">Committee accounts &amp; receipts</p>
-        </div>
+        <div className="relative w-full max-w-sm">
+          <div className="mb-8 text-center">
+            <Image
+              src="/om-logo.png"
+              alt=""
+              width={64}
+              height={64}
+              priority
+              className="mx-auto h-16 w-16 rounded-full object-cover shadow-lift"
+            />
+            <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight">
+              Ganesha Chaturthi
+            </h1>
+            <p className="mt-1.5 text-sm text-muted">Committee accounts &amp; receipts</p>
+          </div>
 
-        <div className="card p-6">
-          {error ? (
-            <p role="alert" className="mb-4 rounded-xl bg-negative/10 px-3 py-2.5 text-sm text-negative">
-              {error === 'AccessDenied'
-                ? 'That Google account is not on the committee list. Ask an admin to add you.'
-                : 'Sign-in failed. Please try again.'}
+          <div className="card p-6">
+            {error ? (
+              <p role="alert" className="mb-4 rounded-xl bg-negative/10 px-3 py-2.5 text-sm text-negative">
+                {error === 'AccessDenied'
+                  ? 'That Google account is not on the committee list. Ask an admin to add you.'
+                  : 'Sign-in failed. Please try again.'}
+              </p>
+            ) : null}
+
+            <form
+              action={async () => {
+                'use server';
+                await signIn('google', { redirectTo: '/' });
+              }}
+            >
+              <button type="submit" className="btn-primary w-full py-2.5">
+                <GoogleMark />
+                Continue with Google
+              </button>
+            </form>
+
+            <p className="mt-4 text-center text-xs text-faint">
+              Access is limited to committee members.
             </p>
-          ) : null}
 
-          <form
-            action={async () => {
-              'use server';
-              await signIn('google', { redirectTo: '/' });
-            }}
-          >
-            <button type="submit" className="btn-primary w-full py-2.5">
-              <GoogleMark />
-              Continue with Google
-            </button>
-          </form>
-
-          <p className="mt-4 text-center text-xs text-faint">
-            Access is limited to committee members.
-          </p>
+            <div className="mt-5 flex justify-center border-t border-line pt-5">
+              <RequestAccessForm />
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </ToastProvider>
   );
 }
 

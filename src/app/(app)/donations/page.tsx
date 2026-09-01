@@ -1,4 +1,4 @@
-import { donationsForYear, totals } from '@/lib/repository';
+import { donationsForYear, totals, foodHeadcount } from '@/lib/repository';
 import { resolveYear } from '@/lib/year';
 import { formatMoney, formatDate, today } from '@/lib/format';
 import { ViewerNotice, PageHeader, EmptyState, Badge, ErrorNotice } from '@/components/ui/primitives';
@@ -44,6 +44,7 @@ export default async function DonationsPage({
   const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
   const shown = sorted.reduce((sum, row) => sum + row.amount, 0);
   const summary = totals(rows, []);
+  const food = foodHeadcount(rows);
 
   // Lanes are redacted for public viewers, so the per-lane rollup is only
   // meaningful — and only shown — to signed-in members.
@@ -67,6 +68,7 @@ export default async function DonationsPage({
           `${year}`,
           `${formatMoney(summary.collected)} collected from ${summary.donorCount} families`,
           summary.pledged > 0 ? `${formatMoney(summary.pledged)} pledged` : null,
+          food.adults + food.kids > 0 ? `${food.adults} adults + ${food.kids} kids for food` : null,
         ]
           .filter(Boolean)
           .join(' · ')}
@@ -125,6 +127,9 @@ export default async function DonationsPage({
                   <Badge tone={row.status === 'Paid' ? 'brand' : 'neutral'}>{row.status}</Badge>
                   {row.votedForFood !== 'No response' ? (
                     <Badge>Food: {row.votedForFood}</Badge>
+                  ) : null}
+                  {row.foodAdults + row.foodKids > 0 ? (
+                    <Badge>{row.foodAdults}A + {row.foodKids}K for food</Badge>
                   ) : null}
                 </>
               }

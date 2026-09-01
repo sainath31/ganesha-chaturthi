@@ -38,9 +38,20 @@ export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
 export const SETTLEMENT_STATUSES = ['Cleared', 'Pending', 'Paid directly'] as const;
 export type SettlementStatus = (typeof SETTLEMENT_STATUSES)[number];
 
+/**
+ * First Day Pooja is the one big sit-down event; Daily Pooja covers every
+ * other day of the celebration, each with its own smaller headcount and its
+ * own prasadam sign-up. Kept as one sheet with an occasion column rather than
+ * two tabs, so a family's RSVPs across the festival are easy to scan together.
+ */
+export const RSVP_OCCASIONS = ['First Day Pooja', 'Daily Pooja'] as const;
+export type RsvpOccasion = (typeof RSVP_OCCASIONS)[number];
+
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD');
 const money = z.coerce.number().finite();
 const text = z.coerce.string().trim().default('');
+
+const headcount = z.coerce.number().int().nonnegative().default(0);
 
 export const donationSchema = z.object({
   id: z.string(),
@@ -56,6 +67,9 @@ export const donationSchema = z.object({
   collectedBy: text,
   status: z.enum(DONATION_STATUSES).default('Paid'),
   votedForFood: z.enum(FOOD_RSVP).default('No response'),
+  /** How many from this family are coming for food, split by age — drives catering counts. */
+  foodAdults: headcount,
+  foodKids: headcount,
   notes: text,
   recordedBy: text,
   recordedAt: text,
@@ -104,6 +118,9 @@ export type ExpenseInput = z.infer<typeof expenseInputSchema>;
 export const receiptSchema = z.object({
   id: z.string(),
   year: z.coerce.number().int().min(2000).max(2100),
+  /** The date on the bill itself — separate from uploadedAt, so a receipt for
+   *  an earlier day can be uploaded later without misdating the expense. */
+  date: isoDate,
   expenseId: text,
   fileId: z.string(),
   fileName: z.string(),
@@ -114,6 +131,30 @@ export const receiptSchema = z.object({
   uploadedAt: text,
 });
 export type Receipt = z.infer<typeof receiptSchema>;
+
+/** Pooja RSVP: who is coming, how many, and what prasadam they signed up for — for either the First Day Pooja or a Daily Pooja. */
+export const rsvpSchema = z.object({
+  id: z.string(),
+  year: z.coerce.number().int().min(2000).max(2100),
+  occasion: z.enum(RSVP_OCCASIONS).default('First Day Pooja'),
+  date: isoDate,
+  name: z.string().min(1, 'Name is required'),
+  adults: headcount,
+  kids: headcount,
+  prasadam: text,
+  notes: text,
+  recordedBy: text,
+  recordedAt: text,
+});
+export type Rsvp = z.infer<typeof rsvpSchema>;
+
+export const rsvpInputSchema = rsvpSchema.omit({
+  id: true,
+  year: true,
+  recordedBy: true,
+  recordedAt: true,
+});
+export type RsvpInput = z.infer<typeof rsvpInputSchema>;
 
 export const DONATION_COLUMNS: Record<keyof Donation, string> = {
   id: 'ID',
@@ -127,6 +168,8 @@ export const DONATION_COLUMNS: Record<keyof Donation, string> = {
   collectedBy: 'Collected By',
   status: 'Status',
   votedForFood: 'Voted For Food',
+  foodAdults: 'Food Adults',
+  foodKids: 'Food Kids',
   notes: 'Notes',
   recordedBy: 'Recorded By',
   recordedAt: 'Recorded At',
@@ -150,6 +193,7 @@ export const EXPENSE_COLUMNS: Record<keyof Expense, string> = {
 export const RECEIPT_COLUMNS: Record<keyof Receipt, string> = {
   id: 'ID',
   year: 'Year',
+  date: 'Date',
   expenseId: 'Expense ID',
   fileId: 'Drive File ID',
   fileName: 'File Name',
@@ -158,4 +202,39 @@ export const RECEIPT_COLUMNS: Record<keyof Receipt, string> = {
   webViewLink: 'Drive Link',
   uploadedBy: 'Uploaded By',
   uploadedAt: 'Uploaded At',
+};
+
+export const RSVP_COLUMNS: Record<keyof Rsvp, string> = {
+  id: 'ID',
+  year: 'Year',
+  occasion: 'Occasion',
+  date: 'Date',
+  name: 'Name',
+  adults: 'Adults',
+  kids: 'Kids',
+  prasadam: 'Prasadam Details',
+  notes: 'Notes',
+  recordedBy: 'Recorded By',
+  recordedAt: 'Recorded At',
+};
+
+/** Logged when someone without access asks to be added as a committee member. */
+export const accessRequestSchema = z.object({
+  id: z.string(),
+  email: z.string().email('Enter a valid email address'),
+  name: text,
+  message: text,
+  requestedAt: text,
+});
+export type AccessRequest = z.infer<typeof accessRequestSchema>;
+
+export const accessRequestInputSchema = accessRequestSchema.omit({ id: true, requestedAt: true });
+export type AccessRequestInput = z.infer<typeof accessRequestInputSchema>;
+
+export const ACCESS_REQUEST_COLUMNS: Record<keyof AccessRequest, string> = {
+  id: 'ID',
+  email: 'Email',
+  name: 'Name',
+  message: 'Message',
+  requestedAt: 'Requested At',
 };

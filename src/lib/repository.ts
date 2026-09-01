@@ -3,22 +3,35 @@ import {
   DONATION_COLUMNS,
   EXPENSE_COLUMNS,
   RECEIPT_COLUMNS,
+  RSVP_COLUMNS,
+  ACCESS_REQUEST_COLUMNS,
   donationSchema,
   expenseSchema,
   receiptSchema,
+  rsvpSchema,
+  accessRequestSchema,
   type Donation,
   type Expense,
+  type Rsvp,
 } from './schema';
 
 export const TABS = {
   donations: 'Donations',
   expenses: 'Expenses',
   receipts: 'Receipts',
+  rsvps: 'RSVP',
+  accessRequests: 'Access Requests',
 } as const;
 
 export const donations = new SheetTable(TABS.donations, DONATION_COLUMNS, donationSchema);
 export const expenses = new SheetTable(TABS.expenses, EXPENSE_COLUMNS, expenseSchema);
 export const receipts = new SheetTable(TABS.receipts, RECEIPT_COLUMNS, receiptSchema);
+export const rsvps = new SheetTable(TABS.rsvps, RSVP_COLUMNS, rsvpSchema);
+export const accessRequests = new SheetTable(
+  TABS.accessRequests,
+  ACCESS_REQUEST_COLUMNS,
+  accessRequestSchema,
+);
 
 export async function ensureAllTabs(): Promise<void> {
   // Sequential: each ensure() reads spreadsheet metadata that a previous
@@ -26,6 +39,8 @@ export async function ensureAllTabs(): Promise<void> {
   await donations.ensure();
   await expenses.ensure();
   await receipts.ensure();
+  await rsvps.ensure();
+  await accessRequests.ensure();
 }
 
 export function newId(prefix: string): string {
@@ -129,4 +144,23 @@ export async function donationsForYear(year: number): Promise<Donation[]> {
 
 export async function expensesForYear(year: number): Promise<Expense[]> {
   return (await expenses.list()).filter((row) => row.year === year);
+}
+
+export async function rsvpsForYear(year: number): Promise<Rsvp[]> {
+  return (await rsvps.list()).filter((row) => row.year === year);
+}
+
+/** How many are coming for food, split by age — the number catering needs to plan for. */
+export function foodHeadcount(donationRows: Donation[]) {
+  return donationRows.reduce(
+    (acc, row) => ({ adults: acc.adults + row.foodAdults, kids: acc.kids + row.foodKids }),
+    { adults: 0, kids: 0 },
+  );
+}
+
+export function rsvpHeadcount(rsvpRows: Rsvp[]) {
+  return rsvpRows.reduce(
+    (acc, row) => ({ adults: acc.adults + row.adults, kids: acc.kids + row.kids }),
+    { adults: 0, kids: 0 },
+  );
 }

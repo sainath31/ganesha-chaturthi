@@ -1,14 +1,14 @@
 'use client';
 
 import { uploadReceipts } from '@/lib/actions';
-import { FormPanel } from './form-panel';
+import { FormPanel, Field } from './form-panel';
 import { ReceiptInput } from './receipt-input';
 
 export function ReceiptUploadPanel({
-  year,
+  today,
   expenses,
 }: {
-  year: number;
+  today: string;
   expenses: { id: string; label: string }[];
 }) {
   return (
@@ -18,8 +18,8 @@ export function ReceiptUploadPanel({
       submitLabel="Upload to Drive"
       action={uploadReceipts}
     >
-      <input type="hidden" name="year" value={`${year}-01-01`} />
-      <div className="sm:col-span-2">
+      <Field label="Date on the bill" name="date" type="date" required defaultValue={today} />
+      <div>
         <label className="label" htmlFor="expenseId">
           Attach to expense (optional)
         </label>

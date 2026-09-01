@@ -11,6 +11,8 @@ import {
   deleteDonation,
   updateExpense,
   deleteExpense,
+  updateRsvp,
+  deleteRsvp,
   type ActionResult,
 } from '@/lib/actions';
 import {
@@ -19,13 +21,16 @@ import {
   FOOD_RSVP,
   EXPENSE_CATEGORIES,
   SETTLEMENT_STATUSES,
+  RSVP_OCCASIONS,
   type Donation,
   type Expense,
+  type Rsvp,
 } from '@/lib/schema';
 
 type Props =
   | { kind: 'donation'; record: Donation; canEdit: boolean; canDelete: boolean; lanes: string[] }
-  | { kind: 'expense'; record: Expense; canEdit: boolean; canDelete: boolean; people: string[] };
+  | { kind: 'expense'; record: Expense; canEdit: boolean; canDelete: boolean; people: string[] }
+  | { kind: 'rsvp'; record: Rsvp; canEdit: boolean; canDelete: boolean };
 
 export function RecordActions(props: Props) {
   const { kind, record, canEdit, canDelete } = props;
@@ -38,7 +43,12 @@ export function RecordActions(props: Props) {
 
   if (!canEdit && !canDelete) return null;
 
-  const label = kind === 'donation' ? (record as Donation).name : (record as Expense).description;
+  const label =
+    kind === 'donation'
+      ? (record as Donation).name
+      : kind === 'rsvp'
+        ? (record as Rsvp).name
+        : (record as Expense).description;
 
   function run(action: () => Promise<ActionResult>, successMessage: string, onDone: () => void) {
     setError(null);
@@ -59,10 +69,11 @@ export function RecordActions(props: Props) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     run(
-      () =>
-        kind === 'donation'
-          ? updateDonation(record.id, formData)
-          : updateExpense(record.id, formData),
+      () => {
+        if (kind === 'donation') return updateDonation(record.id, formData);
+        if (kind === 'rsvp') return updateRsvp(record.id, formData);
+        return updateExpense(record.id, formData);
+      },
       'Changes saved.',
       () => setEditing(false),
     );
@@ -93,13 +104,15 @@ export function RecordActions(props: Props) {
 
       {editing ? (
         <Modal
-          title={kind === 'donation' ? 'Edit donation' : 'Edit expense'}
+          title={kind === 'donation' ? 'Edit donation' : kind === 'rsvp' ? 'Edit RSVP' : 'Edit expense'}
           onClose={() => setEditing(false)}
         >
           <form onSubmit={onSubmit}>
             <div className="grid gap-4 sm:grid-cols-2">
               {props.kind === 'donation' ? (
                 <DonationFields record={props.record} lanes={props.lanes} />
+              ) : props.kind === 'rsvp' ? (
+                <RsvpFields record={props.record} />
               ) : (
                 <ExpenseFields record={props.record} people={props.people} />
               )}
@@ -148,8 +161,11 @@ export function RecordActions(props: Props) {
               disabled={pending}
               onClick={() =>
                 run(
-                  () =>
-                    kind === 'donation' ? deleteDonation(record.id) : deleteExpense(record.id),
+                  () => {
+                    if (kind === 'donation') return deleteDonation(record.id);
+                    if (kind === 'rsvp') return deleteRsvp(record.id);
+                    return deleteExpense(record.id);
+                  },
                   'Record deleted.',
                   () => setConfirming(false),
                 )
@@ -212,6 +228,8 @@ function DonationFields({ record, lanes }: { record: Donation; lanes: string[] }
         options={FOOD_RSVP}
         defaultValue={record.votedForFood}
       />
+      <Field label="Food — adults" name="foodAdults" type="number" defaultValue={record.foodAdults} />
+      <Field label="Food — kids" name="foodKids" type="number" defaultValue={record.foodKids} />
       <Field label="Notes" name="notes" defaultValue={record.notes} span />
     </>
   );
@@ -266,6 +284,20 @@ function ExpenseFields({ record, people }: { record: Expense; people: string[] }
         <span className="label">Add more receipts</span>
         <ReceiptInput name="receipts" />
       </div>
+    </>
+  );
+}
+
+function RsvpFields({ record }: { record: Rsvp }) {
+  return (
+    <>
+      <Select label="Occasion" name="occasion" options={RSVP_OCCASIONS} defaultValue={record.occasion} />
+      <Field label="Name" name="name" required defaultValue={record.name} />
+      <Field label="Date" name="date" type="date" required defaultValue={record.date} />
+      <Field label="Adults" name="adults" type="number" defaultValue={record.adults} />
+      <Field label="Kids" name="kids" type="number" defaultValue={record.kids} />
+      <Field label="Prasadam details" name="prasadam" defaultValue={record.prasadam} span />
+      <Field label="Notes" name="notes" defaultValue={record.notes} span />
     </>
   );
 }

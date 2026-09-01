@@ -29,7 +29,13 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
     return Object.keys(this.columns);
   }
 
-  /** Creates the tab with its header row if it does not exist yet. */
+  /**
+   * Creates the tab with its header row if it does not exist yet. If the tab
+   * already exists — from before a column was added to the schema — any
+   * headers this table expects but the sheet doesn't have yet are appended to
+   * the end of the header row. Existing columns are never reordered or
+   * removed, so rows already written stay valid; this only grows the row.
+   */
   async ensure(): Promise<void> {
     if (this.demoRows) return;
     const sheets = sheetsClient();
@@ -47,13 +53,27 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
       spreadsheetId: env.spreadsheetId,
       range: `${this.tab}!1:1`,
     });
+    const currentHeaders = (headerRow.data.values?.[0] ?? []).map(String);
 
-    if (!headerRow.data.values?.[0]?.length) {
+    if (currentHeaders.length === 0) {
       await sheets.spreadsheets.values.update({
         spreadsheetId: env.spreadsheetId,
         range: `${this.tab}!A1`,
         valueInputOption: 'RAW',
         requestBody: { values: [this.headers] },
+      });
+      return;
+    }
+
+    const known = new Set(currentHeaders.map((h) => h.trim().toLowerCase()));
+    const missing = this.headers.filter((header) => !known.has(header.trim().toLowerCase()));
+    if (missing.length > 0) {
+      const startColumn = columnLetter(currentHeaders.length + 1);
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: env.spreadsheetId,
+        range: `${this.tab}!${startColumn}1`,
+        valueInputOption: 'RAW',
+        requestBody: { values: [missing] },
       });
     }
   }
@@ -108,16 +128,29 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
     return parsed;
   }
 
+  /** Lays a record out in the sheet's actual current column order, not the
+   *  schema's declared order — the two can diverge once a column has been
+   *  added to the schema after the tab already existed, or the sheet owner
+   *  has reordered columns by hand. */
+  private rowValues(header: string[], record: z.infer<S>): unknown[] {
+    const valueByColumn = new Map<string, unknown>();
+    for (const field of this.fields) {
+      valueByColumn.set(this.columns[field].trim().toLowerCase(), (record as Record<string, unknown>)[field] ?? '');
+    }
+    return header.map((name) => valueByColumn.get(name.trim().toLowerCase()) ?? '');
+  }
+
   async append(record: z.infer<S>): Promise<void> {
     if (this.demoRows) throw new Error('Demo mode is read-only. Configure the Google sheet to save records.');
     const sheets = sheetsClient();
+    const { header } = await this.rawRows();
     await sheets.spreadsheets.values.append({
       spreadsheetId: env.spreadsheetId,
       range: `${this.tab}!A1`,
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
       requestBody: {
-        values: [this.fields.map((field) => (record as Record<string, unknown>)[field] ?? '')],
+        values: [this.rowValues(header.length ? header : this.headers, record)],
       },
     });
   }
@@ -139,7 +172,7 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
       range: `${this.tab}!A${rowNumber}`,
       valueInputOption: 'RAW',
       requestBody: {
-        values: [this.fields.map((field) => (record as Record<string, unknown>)[field] ?? '')],
+        values: [this.rowValues(header, record)],
       },
     });
     return true;
@@ -180,4 +213,16 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
     });
     return true;
   }
+}
+
+/** 1-indexed column number to its spreadsheet letter(s): 1 -> A, 27 -> AA. */
+function columnLetter(n: number): string {
+  let letters = '';
+  let value = n;
+  while (value > 0) {
+    const remainder = (value - 1) % 26;
+    letters = String.fromCharCode(65 + remainder) + letters;
+    value = Math.floor((value - 1) / 26);
+  }
+  return letters;
 }

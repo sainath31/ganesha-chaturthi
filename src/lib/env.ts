@@ -63,4 +63,19 @@ export const env = {
   get locale() {
     return process.env.NEXT_PUBLIC_LOCALE ?? 'en-US';
   },
+  /**
+   * Optional: sends an email via Gmail SMTP whenever someone submits an
+   * access request. The request is always logged to the sheet regardless —
+   * these three just enable the email on top of that. Leave any of them
+   * unset to skip email and rely on checking the sheet instead.
+   */
+  get gmailUser() {
+    return process.env.GMAIL_USER || null;
+  },
+  get gmailAppPassword() {
+    return process.env.GMAIL_APP_PASSWORD || null;
+  },
+  get accessRequestNotifyEmail() {
+    return process.env.ACCESS_REQUEST_NOTIFY_EMAIL || null;
+  },
 };

@@ -1,4 +1,4 @@
-import type { Donation, Expense, Receipt } from './schema';
+import type { Donation, Expense, Receipt, Rsvp } from './schema';
 import type { Role } from './auth';
 import { canEdit, canViewReceipts } from './auth';
 
@@ -47,6 +47,16 @@ export function redactExpense(row: Expense, role: Role): Expense {
     // named neighbour, so it is shortened rather than shown in full.
     paidBy: row.paidBy ? shortenName(row.paidBy) : '',
     description: scrubContacts(row.description),
+    notes: '',
+    recordedBy: '',
+  };
+}
+
+export function redactRsvp(row: Rsvp, role: Role): Rsvp {
+  if (canEdit(role)) return row;
+  return {
+    ...row,
+    name: shortenName(row.name),
     notes: '',
     recordedBy: '',
   };

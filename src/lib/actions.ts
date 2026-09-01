@@ -1,11 +1,16 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { requireEditor, requireAdmin } from './auth';
-import { donations, expenses, receipts, newId, nextReceiptNo } from './repository';
+import { requireEditor, requireAdmin, currentUser, signOut } from './auth';
+import { donations, expenses, receipts, rsvps, accessRequests, newId, nextReceiptNo } from './repository';
 import { yearOf } from './year';
-import { donationInputSchema, expenseInputSchema } from './schema';
+import { donationInputSchema, expenseInputSchema, rsvpInputSchema, accessRequestInputSchema } from './schema';
 import { uploadReceipt, deleteReceiptFile } from './drive';
+import { notifyAccessRequest } from './mail';
+
+export async function signOutAction(): Promise<void> {
+  await signOut({ redirectTo: '/' });
+}
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -94,6 +99,7 @@ export async function createExpense(formData: FormData): Promise<ActionResult> {
         ...uploaded,
         id: newId('rec'),
         year,
+        date: input.date,
         expenseId: id,
         uploadedBy: user.email,
         uploadedAt: new Date().toISOString(),
@@ -135,6 +141,7 @@ export async function updateExpense(id: string, formData: FormData): Promise<Act
         ...uploaded,
         id: newId('rec'),
         year,
+        date: input.date,
         expenseId: id,
         uploadedBy: user.email,
         uploadedAt: new Date().toISOString(),
@@ -167,7 +174,8 @@ export async function uploadReceipts(formData: FormData): Promise<ActionResult> 
   try {
     const user = await requireEditor();
     const expenseId = String(formData.get('expenseId') ?? '');
-    const year = yearOf(String(formData.get('year') ?? ''));
+    const date = String(formData.get('date') ?? '');
+    const year = yearOf(date);
     const files = formData.getAll('receipts').filter((f): f is File => f instanceof File && f.size > 0);
     if (files.length === 0) return { ok: false, error: 'Choose at least one file to upload.' };
 
@@ -177,6 +185,7 @@ export async function uploadReceipts(formData: FormData): Promise<ActionResult> 
         ...uploaded,
         id: newId('rec'),
         year,
+        date,
         expenseId,
         uploadedBy: user.email,
         uploadedAt: new Date().toISOString(),
@@ -204,6 +213,86 @@ export async function deleteReceipt(id: string): Promise<ActionResult> {
 
     revalidatePath('/receipts');
     revalidatePath('/expenses');
+    return { ok: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+/**
+ * Pooja RSVP is a public sign-up, not a financial record: anyone with the
+ * link — signed in or not — can submit one. Editing and removing entries
+ * stays restricted, so a stray submission can't be used to tamper with
+ * someone else's.
+ */
+export async function createRsvp(formData: FormData): Promise<ActionResult> {
+  try {
+    const user = await currentUser();
+    const input = rsvpInputSchema.parse(Object.fromEntries(formData));
+
+    await rsvps.append({
+      ...input,
+      id: newId('rsvp'),
+      year: yearOf(input.date),
+      recordedBy: user?.email ?? '',
+      recordedAt: new Date().toISOString(),
+    });
+
+    revalidatePath('/rsvp');
+    return { ok: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+export async function updateRsvp(id: string, formData: FormData): Promise<ActionResult> {
+  try {
+    const user = await requireEditor();
+    const input = rsvpInputSchema.parse(Object.fromEntries(formData));
+    const existing = (await rsvps.list()).find((row) => row.id === id);
+    if (!existing) return { ok: false, error: 'That RSVP no longer exists.' };
+
+    await rsvps.update(id, {
+      ...existing,
+      ...input,
+      year: yearOf(input.date),
+      recordedBy: user.email,
+      recordedAt: new Date().toISOString(),
+    });
+
+    revalidatePath('/rsvp');
+    return { ok: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+export async function deleteRsvp(id: string): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    await rsvps.delete(id);
+    revalidatePath('/rsvp');
+    return { ok: true };
+  } catch (error) {
+    return fail(error);
+  }
+}
+
+/** Public: anyone denied access (or without an account at all) can ask to be added. */
+export async function requestAccess(formData: FormData): Promise<ActionResult> {
+  try {
+    const input = accessRequestInputSchema.parse(Object.fromEntries(formData));
+
+    // The signin page isn't wrapped by the main app layout, so ensure the
+    // tab exists here rather than relying on a prior page visit for it.
+    await accessRequests.ensure();
+    await accessRequests.append({
+      ...input,
+      id: newId('req'),
+      requestedAt: new Date().toISOString(),
+    });
+
+    await notifyAccessRequest(input);
     return { ok: true };
   } catch (error) {
     return fail(error);

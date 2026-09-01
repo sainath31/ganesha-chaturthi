@@ -22,7 +22,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-center gap-2 p-4 sm:items-end sm:p-6"
+        className="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex flex-col items-center gap-2 p-4 sm:items-end sm:p-6 md:bottom-0"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       >
         {toasts.map((toast) => (
           <ToastItem
