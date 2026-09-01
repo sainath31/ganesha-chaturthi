@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { sheetsClient } from './google';
 import { env } from './env';
+import { DEMO_ROWS } from './demo-data';
 
 /**
  * A typed view over one tab of the spreadsheet.
@@ -30,6 +31,7 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
 
   /** Creates the tab with its header row if it does not exist yet. */
   async ensure(): Promise<void> {
+    if (this.demoRows) return;
     const sheets = sheetsClient();
     const meta = await sheets.spreadsheets.get({ spreadsheetId: env.spreadsheetId });
     const exists = meta.data.sheets?.some((s) => s.properties?.title === this.tab);
@@ -56,6 +58,10 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
     }
   }
 
+  private get demoRows(): Record<string, unknown>[] | null {
+    return process.env.DEMO_MODE === 'true' ? (DEMO_ROWS[this.tab] ?? []) : null;
+  }
+
   private async rawRows(): Promise<{ header: string[]; rows: string[][] }> {
     const sheets = sheetsClient();
     const response = await sheets.spreadsheets.values.get({
@@ -69,6 +75,18 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
   }
 
   async list(): Promise<z.infer<S>[]> {
+    const demo = this.demoRows;
+    if (demo) {
+      return demo
+        .map((row) => {
+          const record: Record<string, unknown> = {};
+          for (const field of this.fields) record[field] = row[this.columns[field]] ?? '';
+          return this.schema.safeParse(record);
+        })
+        .filter((result) => result.success)
+        .map((result) => result.data as z.infer<S>);
+    }
+
     const { header, rows } = await this.rawRows();
     const indexOf = new Map(header.map((name, i) => [name.trim().toLowerCase(), i]));
 
@@ -91,6 +109,7 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
   }
 
   async append(record: z.infer<S>): Promise<void> {
+    if (this.demoRows) throw new Error('Demo mode is read-only. Configure the Google sheet to save records.');
     const sheets = sheetsClient();
     await sheets.spreadsheets.values.append({
       spreadsheetId: env.spreadsheetId,

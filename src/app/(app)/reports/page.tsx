@@ -1,5 +1,7 @@
 import { donationsForYear, expensesForYear, totals, byCategory, byCollector, reimbursements } from '@/lib/repository';
 import { resolveYear } from '@/lib/year';
+import { currentUser } from '@/lib/auth';
+import { redactDonation, redactExpense } from '@/lib/redact';
 import { formatMoney } from '@/lib/format';
 import { PageHeader, StatTile, ErrorNotice } from '@/components/ui/primitives';
 import { Table, Th, Td } from '@/components/ui/table';
@@ -15,12 +17,16 @@ export default async function ReportsPage({
 }) {
   const year = resolveYear((await searchParams).year);
 
+  const role = (await currentUser())?.role ?? 'viewer';
+
   let donationRows, expenseRows;
   try {
-    [donationRows, expenseRows] = await Promise.all([
+    const [rawDonations, rawExpenses] = await Promise.all([
       donationsForYear(year),
       expensesForYear(year),
     ]);
+    donationRows = rawDonations.map((row) => redactDonation(row, role));
+    expenseRows = rawExpenses.map((row) => redactExpense(row, role));
   } catch (error) {
     return <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />;
   }
@@ -29,6 +35,15 @@ export default async function ReportsPage({
   const categories = byCategory(expenseRows);
   const collectors = byCollector(donationRows);
   const settlements = reimbursements(expenseRows);
+  const settlementTotals = settlements.reduce(
+    (acc, row) => ({
+      total: acc.total + row.total,
+      cleared: acc.cleared + row.cleared,
+      pending: acc.pending + row.pending,
+    }),
+    { total: 0, cleared: 0, pending: 0 },
+  );
+  const categoryTotal = categories.reduce((sum, row) => sum + row.total, 0);
 
   return (
     <>
@@ -38,7 +53,7 @@ export default async function ReportsPage({
         action={<PrintButton />}
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         <StatTile label="Total received" value={formatMoney(summary.collected)} tone="positive" />
         <StatTile label="Total spent" value={formatMoney(summary.spent)} />
         <StatTile
@@ -49,7 +64,12 @@ export default async function ReportsPage({
       </div>
 
       <section className="card mt-6 p-6">
-        <h2 className="mb-5 font-display text-lg font-semibold">Expenditure by category</h2>
+        <div className="mb-5 flex items-baseline justify-between gap-4">
+          <h2 className="font-display text-lg font-semibold">Expenditure by category</h2>
+          <span className="font-display text-base font-semibold tabular-nums">
+            {formatMoney(categoryTotal)}
+          </span>
+        </div>
         {categories.length ? (
           <CategoryBars data={categories} />
         ) : (
@@ -116,6 +136,25 @@ export default async function ReportsPage({
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr className="border-t border-line bg-raised/60">
+              <Td className="font-medium text-muted">Total</Td>
+              <Td align="right" className="font-display font-semibold tabular-nums">
+                {formatMoney(settlementTotals.total)}
+              </Td>
+              <Td align="right" className="font-medium tabular-nums text-positive">
+                {formatMoney(settlementTotals.cleared)}
+              </Td>
+              <Td
+                align="right"
+                className={`font-display font-semibold tabular-nums ${
+                  settlementTotals.pending > 0 ? 'text-negative' : 'text-muted'
+                }`}
+              >
+                {formatMoney(settlementTotals.pending)}
+              </Td>
+            </tr>
+          </tfoot>
         </Table>
       </section>
 

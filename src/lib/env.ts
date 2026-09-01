@@ -32,11 +32,30 @@ export const env = {
   get receiptsFolderId() {
     return required('DRIVE_RECEIPTS_FOLDER_ID');
   },
-  get allowedEmails() {
-    return list('ALLOWED_EMAILS');
-  },
+  /** Full access, including deletion. */
   get adminEmails() {
     return list('ADMIN_EMAILS');
+  },
+  /** May record donations and expenses and upload receipts. */
+  get editorEmails() {
+    return list('EDITOR_EMAILS');
+  },
+  /**
+   * Optional narrower list for receipt images specifically. When empty, any
+   * editor or admin can view them; when set, only these addresses (plus
+   * admins) can — useful when more people record expenses than should see the
+   * bills themselves.
+   */
+  get receiptViewerEmails() {
+    return list('RECEIPT_VIEWER_EMAILS');
+  },
+  /**
+   * Read access is public by default: anyone with the link sees the figures
+   * without signing in. Set REQUIRE_SIGN_IN=true to instead demand a Google
+   * account, in which case only listed admins and editors can get in at all.
+   */
+  get requireSignIn() {
+    return process.env.REQUIRE_SIGN_IN === 'true';
   },
   get currency() {
     return process.env.NEXT_PUBLIC_CURRENCY ?? 'USD';

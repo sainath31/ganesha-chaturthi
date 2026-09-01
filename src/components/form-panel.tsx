@@ -3,6 +3,7 @@
 import { useState, useTransition, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ActionResult } from '@/lib/actions';
+import { useToast } from './toast';
 
 /**
  * A disclosure panel wrapping a server action. Kept deliberately plain rather
@@ -26,6 +27,7 @@ export function FormPanel({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const toast = useToast();
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,6 +40,7 @@ export function FormPanel({
       if (result.ok) {
         form.reset();
         setOpen(false);
+        toast(`${title} — saved.`);
         router.refresh();
       } else {
         setError(result.error);

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { donationsForYear, expensesForYear, totals, byCategory, reimbursements, byCollector } from '@/lib/repository';
 import { resolveYear } from '@/lib/year';
+import { currentUser } from '@/lib/auth';
+import { redactDonation, redactExpense } from '@/lib/redact';
 import { formatMoney } from '@/lib/format';
 import { PageHeader, StatTile, EmptyState, ErrorNotice } from '@/components/ui/primitives';
 import { CategoryBars, BalanceMeter } from '@/components/charts';
@@ -14,12 +16,16 @@ export default async function DashboardPage({
 }) {
   const year = resolveYear((await searchParams).year);
 
+  const role = (await currentUser())?.role ?? 'viewer';
+
   let donationRows, expenseRows;
   try {
-    [donationRows, expenseRows] = await Promise.all([
+    const [rawDonations, rawExpenses] = await Promise.all([
       donationsForYear(year),
       expensesForYear(year),
     ]);
+    donationRows = rawDonations.map((row) => redactDonation(row, role));
+    expenseRows = rawExpenses.map((row) => redactExpense(row, role));
   } catch (error) {
     return (
       <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />
@@ -60,7 +66,7 @@ export default async function DashboardPage({
         subtitle={`${summary.donationCount} donations · ${summary.expenseCount} expenses`}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatTile
           label="Collected"
           value={formatMoney(summary.collected)}
@@ -73,10 +79,10 @@ export default async function DashboardPage({
           value={formatMoney(Math.abs(summary.balance))}
           tone={summary.balance < 0 ? 'negative' : 'brand'}
         />
-        <StatTile label="Contributing families" value={String(summary.donorCount)} />
+        <StatTile label="Families" value={String(summary.donorCount)} />
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-5">
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-5">
         <section className="card p-6 lg:col-span-2">
           <h2 className="mb-5 font-display text-lg font-semibold">Balance</h2>
           <BalanceMeter collected={summary.collected} spent={summary.spent} />
@@ -98,7 +104,7 @@ export default async function DashboardPage({
         </section>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
         <section className="card p-6">
           <h2 className="mb-1 font-display text-lg font-semibold">Reimbursements owed</h2>
           <p className="mb-4 text-sm text-muted">Money members fronted and have not been paid back.</p>

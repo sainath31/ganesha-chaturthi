@@ -1,17 +1,23 @@
-import { auth } from '@/lib/auth';
+import { auth, canViewReceipts } from '@/lib/auth';
 import { fetchReceiptBytes } from '@/lib/drive';
 
 /**
- * Receipts stay private in Drive — nothing is shared "anyone with the link".
- * Signed-in committee members read them through this proxy instead.
+ * Receipt files are never shared "anyone with the link" in Drive — they are
+ * only reachable through this proxy.
+ *
+ * Unlike the figures, the images are withheld from public viewers entirely: a
+ * photographed bill can carry a card number, a signature or a home address,
+ * and no field-level redaction can reach inside a JPEG.
  */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ fileId: string }> },
 ) {
   const session = await auth();
-  if (!session?.user?.email) {
-    return new Response('Not authorised', { status: 401 });
+  if (!canViewReceipts(session?.user?.role ?? 'viewer', session?.user?.email)) {
+    return new Response('Receipts are visible to authorised committee members only.', {
+      status: 403,
+    });
   }
 
   const { fileId } = await params;
@@ -20,7 +26,7 @@ export async function GET(
     return new Response(body, {
       headers: {
         'Content-Type': mimeType,
-        'Cache-Control': 'private, max-age=3600',
+        'Cache-Control': 'private, no-store',
         'Content-Disposition': 'inline',
       },
     });

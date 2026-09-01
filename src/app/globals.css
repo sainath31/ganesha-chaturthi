@@ -17,24 +17,6 @@
     --accent: 217 119 6;
     --positive: 21 128 61;
     --negative: 185 28 28;
-    --font-sans: 'Inter', system-ui;
-    --font-display: 'Fraunces', Georgia;
-  }
-
-  .dark {
-    color-scheme: dark;
-    --bg: 20 18 16;
-    --surface: 30 27 24;
-    --raised: 41 37 33;
-    --line: 60 54 48;
-    --ink: 245 241 235;
-    --muted: 176 167 157;
-    --faint: 133 124 114;
-    --brand: 234 108 45;
-    --brand-ink: 26 15 8;
-    --accent: 245 158 11;
-    --positive: 74 190 120;
-    --negative: 248 113 113;
   }
 
   * {
@@ -77,5 +59,103 @@
 
   .label {
     @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Long committee names and amounts should never trigger a horizontal page
+     scroll on a phone; only the tables themselves scroll. */
+  body {
+    overflow-x: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--brand));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Scroll affordance: a soft edge fade tells you a wide table continues. */
+  .scroll-x {
+    @apply overflow-x-auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .enter {
+    animation: enter 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@layer components {
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-raised;
+  }
+
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, rgb(var(--ink) / 0.05), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.6s infinite;
+  }
+}
+
+/* The reports page doubles as the printed statement handed round at the
+   committee meeting, so strip the chrome and force a light ground. */
+@media print {
+  :root {
+    --bg: 255 255 255;
+    --surface: 255 255 255;
+    --raised: 245 245 245;
+    --ink: 0 0 0;
+    --muted: 60 60 60;
+  }
+
+  header,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .card {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
   }
 }

@@ -105,10 +105,15 @@ export function reimbursements(expenseRows: Expense[]) {
   return [...groups.values()].sort((a, b) => b.total - a.total);
 }
 
-/** Spend per category, largest first — the shape the reports page charts. */
+/**
+ * Spend per category, largest first. Mirrors the `spent` total by excluding
+ * costs a family absorbed outright — otherwise the chart sums to more than the
+ * headline figure and the two visibly disagree.
+ */
 export function byCategory(expenseRows: Expense[]) {
   const groups = new Map<string, number>();
   for (const row of expenseRows) {
+    if (row.settlement === 'Paid directly') continue;
     groups.set(row.category, (groups.get(row.category) ?? 0) + row.amount);
   }
   return [...groups.entries()]

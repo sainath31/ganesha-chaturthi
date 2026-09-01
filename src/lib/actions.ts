@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { requireUser, requireAdmin } from './auth';
+import { requireEditor, requireAdmin } from './auth';
 import { donations, expenses, receipts, newId, nextReceiptNo } from './repository';
 import { yearOf } from './year';
 import { donationInputSchema, expenseInputSchema } from './schema';
@@ -15,7 +15,7 @@ function fail(error: unknown): ActionResult {
 
 export async function createDonation(formData: FormData): Promise<ActionResult> {
   try {
-    const user = await requireUser();
+    const user = await requireEditor();
     const input = donationInputSchema.parse(Object.fromEntries(formData));
     const year = yearOf(input.date);
     const existing = (await donations.list()).filter((row) => row.year === year);
@@ -39,7 +39,7 @@ export async function createDonation(formData: FormData): Promise<ActionResult> 
 
 export async function updateDonation(id: string, formData: FormData): Promise<ActionResult> {
   try {
-    const user = await requireUser();
+    const user = await requireEditor();
     const input = donationInputSchema.parse(Object.fromEntries(formData));
     const existing = (await donations.list()).find((row) => row.id === id);
     if (!existing) return { ok: false, error: 'That donation no longer exists.' };
@@ -74,7 +74,7 @@ export async function deleteDonation(id: string): Promise<ActionResult> {
 
 export async function createExpense(formData: FormData): Promise<ActionResult> {
   try {
-    const user = await requireUser();
+    const user = await requireEditor();
     const input = expenseInputSchema.parse(Object.fromEntries(formData));
     const id = newId('exp');
     const year = yearOf(input.date);
@@ -111,20 +111,38 @@ export async function createExpense(formData: FormData): Promise<ActionResult> {
 
 export async function updateExpense(id: string, formData: FormData): Promise<ActionResult> {
   try {
-    const user = await requireUser();
+    const user = await requireEditor();
     const input = expenseInputSchema.parse(Object.fromEntries(formData));
     const existing = (await expenses.list()).find((row) => row.id === id);
     if (!existing) return { ok: false, error: 'That expense no longer exists.' };
 
+    const year = yearOf(input.date);
     await expenses.update(id, {
       ...existing,
       ...input,
-      year: yearOf(input.date),
+      year,
       recordedBy: user.email,
       recordedAt: new Date().toISOString(),
     });
 
+    // The edit dialog can attach further receipts to an expense already recorded.
+    const files = formData
+      .getAll('receipts')
+      .filter((f): f is File => f instanceof File && f.size > 0);
+    for (const file of files) {
+      const uploaded = await uploadReceipt(file, { year });
+      await receipts.append({
+        ...uploaded,
+        id: newId('rec'),
+        year,
+        expenseId: id,
+        uploadedBy: user.email,
+        uploadedAt: new Date().toISOString(),
+      });
+    }
+
     revalidatePath('/expenses');
+    revalidatePath('/receipts');
     revalidatePath('/');
     return { ok: true };
   } catch (error) {
@@ -147,7 +165,7 @@ export async function deleteExpense(id: string): Promise<ActionResult> {
 /** Standalone receipt upload, optionally attached to an existing expense. */
 export async function uploadReceipts(formData: FormData): Promise<ActionResult> {
   try {
-    const user = await requireUser();
+    const user = await requireEditor();
     const expenseId = String(formData.get('expenseId') ?? '');
     const year = yearOf(String(formData.get('year') ?? ''));
     const files = formData.getAll('receipts').filter((f): f is File => f instanceof File && f.size > 0);

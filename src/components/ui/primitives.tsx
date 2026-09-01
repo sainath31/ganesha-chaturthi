@@ -12,7 +12,9 @@ export function PageHeader({
   return (
     <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">{title}</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+          {title}
+        </h1>
         {subtitle ? <p className="mt-1.5 text-sm text-muted">{subtitle}</p> : null}
       </div>
       {action}
@@ -39,9 +41,13 @@ export function StatTile({
   }[tone];
 
   return (
-    <div className="card p-5">
-      <p className="text-xs font-medium uppercase tracking-wide text-faint">{label}</p>
-      <p className={`mt-2 font-display text-3xl font-semibold tabular-nums ${toneClass}`}>{value}</p>
+    <div className="card p-4 sm:p-5">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-faint sm:text-xs">
+        {label}
+      </p>
+      <p className={`mt-2 font-display text-2xl font-semibold tabular-nums sm:text-3xl ${toneClass}`}>
+        {value}
+      </p>
       {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
     </div>
   );
@@ -81,6 +87,24 @@ export function ErrorNotice({ message }: { message: string }) {
     <div className="card border-negative/30 bg-negative/5 p-5">
       <h2 className="font-display text-base font-semibold text-negative">Could not load data</h2>
       <p className="mt-1.5 whitespace-pre-wrap text-sm text-muted">{message}</p>
+    </div>
+  );
+}
+
+export function ViewerNotice() {
+  return (
+    <div className="card mb-6 flex items-start gap-3 border-brand/20 bg-brand/5 p-4">
+      <span aria-hidden className="text-base leading-none">
+        🔒
+      </span>
+      <p className="text-sm text-muted">
+        You are viewing the public summary. Household names are shortened and lanes, notes and
+        receipt images are hidden.{' '}
+        <a href="/signin" className="font-medium text-brand underline underline-offset-2">
+          Committee members can sign in
+        </a>{' '}
+        to see full details.
+      </p>
     </div>
   );
 }
