@@ -3,6 +3,7 @@ import { receipts as receiptTable } from '@/lib/repository';
 import { resolveYear } from '@/lib/year';
 import { formatMoney, today } from '@/lib/format';
 import { ViewerNotice, PageHeader, ErrorNotice } from '@/components/ui/primitives';
+import { Table, Th, Td } from '@/components/ui/table';
 import { ExpensesBrowser } from '@/components/expenses-browser';
 import { currentUser, canEdit } from '@/lib/auth';
 import { redactExpense, redactDonation } from '@/lib/redact';
@@ -56,23 +57,32 @@ export default async function ExpensesPage({
 
       {owed.length > 0 ? (
         <div className="mb-6">
-          <h2 className="mb-4 font-display text-lg font-semibold">Reimbursements</h2>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {owed.map((row) => (
-              <div key={row.person} className="card p-4">
-                <p className="truncate text-xs font-medium uppercase tracking-wide text-faint">
-                  {row.person}
-                </p>
-                <p className="mt-1.5 font-display text-xl font-semibold tabular-nums">
-                  {formatMoney(row.total)}
-                </p>
-                <p className="text-[11px] text-faint">fronted</p>
-                <p className={`mt-1 text-xs ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}>
-                  {row.pending > 0 ? `${formatMoney(row.pending)} outstanding` : 'Settled'}
-                </p>
-              </div>
-            ))}
-          </div>
+          <h2 className="mb-3 font-display text-lg font-semibold">Reimbursements</h2>
+          <Table>
+            <thead>
+              <tr className="border-b border-line bg-raised/60">
+                <Th>Member</Th>
+                <Th align="right">Fronted</Th>
+                <Th align="right">Cleared</Th>
+                <Th align="right">Outstanding</Th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {owed.map((row) => (
+                <tr key={row.person}>
+                  <Td className="text-ink">{row.person}</Td>
+                  <Td align="right" className="tabular-nums text-muted">{formatMoney(row.total)}</Td>
+                  <Td align="right" className="tabular-nums text-positive">{formatMoney(row.cleared)}</Td>
+                  <Td
+                    align="right"
+                    className={`font-medium tabular-nums ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}
+                  >
+                    {formatMoney(row.pending)}
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </div>
       ) : null}
 
