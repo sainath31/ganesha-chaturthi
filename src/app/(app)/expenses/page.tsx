@@ -89,13 +89,13 @@ export default async function ExpensesPage({
       ) : null}
 
       {categories.length > 1 ? (
-        <details className="card mb-6 p-5">
-          <summary className="cursor-pointer list-none font-display text-base font-semibold">
+        <section className="card mb-6 p-5">
+          <h2 className="font-display text-base font-semibold">
             Subtotals by category
             <span className="ml-2 text-sm font-normal text-faint">
               ({categories.length} categories)
             </span>
-          </summary>
+          </h2>
           <ul className="mt-4 grid gap-x-6 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((row) => (
               <li
@@ -109,7 +109,7 @@ export default async function ExpensesPage({
               </li>
             ))}
           </ul>
-        </details>
+        </section>
       ) : null}
 
       <ExpensesBrowser
