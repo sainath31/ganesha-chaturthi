@@ -46,19 +46,20 @@ export function RsvpTabs({
   return (
     <>
       <div className="sticky top-14 z-20 -mx-4 mb-6 border-b border-line bg-bg/95 px-4 py-3 backdrop-blur-md sm:-mx-0 sm:rounded-xl sm:border sm:px-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex gap-1 rounded-lg bg-raised p-1">
+        <div className="flex flex-nowrap items-center justify-between gap-2">
+          <div className="flex min-w-0 gap-1 overflow-x-auto rounded-lg bg-raised p-1">
             {RSVP_OCCASIONS.map((occasion) => (
               <button
                 key={occasion}
                 type="button"
                 onClick={() => setActive(occasion)}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`shrink-0 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
                   active === occasion ? 'bg-surface text-brand shadow-sm' : 'text-muted hover:text-ink'
                 }`}
               >
-                {occasion}
-                <span className="ml-1.5 text-xs text-faint">({rowsByOccasion[occasion].length})</span>
+                <span className="sm:hidden">{occasion === 'First Day Pooja' ? 'First Day' : 'Daily'}</span>
+                <span className="hidden sm:inline">{occasion}</span>
+                <span className="ml-1 text-faint sm:ml-1.5">({rowsByOccasion[occasion].length})</span>
               </button>
             ))}
           </div>
