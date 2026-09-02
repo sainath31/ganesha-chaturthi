@@ -49,11 +49,7 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
       });
     }
 
-    const headerRow = await sheets.spreadsheets.values.get({
-      spreadsheetId: env.spreadsheetId,
-      range: `${this.tab}!1:1`,
-    });
-    const currentHeaders = (headerRow.data.values?.[0] ?? []).map(String);
+    const currentHeaders = await this.headerRow();
 
     if (currentHeaders.length === 0) {
       await sheets.spreadsheets.values.update({
@@ -80,6 +76,26 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
 
   private get demoRows(): Record<string, unknown>[] | null {
     return process.env.DEMO_MODE === 'true' ? (DEMO_ROWS[this.tab] ?? []) : null;
+  }
+
+  /** Just the header row — used where the rest of the tab isn't needed, so a
+   *  growing table doesn't get downloaded in full just to read one row. */
+  private async headerRow(): Promise<string[]> {
+    const response = await sheetsClient().spreadsheets.values.get({
+      spreadsheetId: env.spreadsheetId,
+      range: `${this.tab}!1:1`,
+    });
+    return (response.data.values?.[0] ?? []).map(String);
+  }
+
+  /** Shared by update() and delete(): which row (0-based, data rows only) has
+   *  this id, or -1 if the id column is missing or no row matches. */
+  private findRowOffset(header: string[], rows: string[][], id: string): number {
+    const idColumn = header.findIndex(
+      (name) => name.trim().toLowerCase() === this.columns.id.trim().toLowerCase(),
+    );
+    if (idColumn === -1) return -1;
+    return rows.findIndex((row) => String(row[idColumn] ?? '').trim() === id);
   }
 
   private async rawRows(): Promise<{ header: string[]; rows: string[][] }> {
@@ -143,7 +159,7 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
   async append(record: z.infer<S>): Promise<void> {
     if (this.demoRows) throw new Error('Demo mode is read-only. Configure the Google sheet to save records.');
     const sheets = sheetsClient();
-    const { header } = await this.rawRows();
+    const header = await this.headerRow();
     await sheets.spreadsheets.values.append({
       spreadsheetId: env.spreadsheetId,
       range: `${this.tab}!A1`,
@@ -158,12 +174,7 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
   /** Overwrites the row whose ID column matches. Returns false if not found. */
   async update(id: string, record: z.infer<S>): Promise<boolean> {
     const { header, rows } = await this.rawRows();
-    const idColumn = header.findIndex(
-      (name) => name.trim().toLowerCase() === this.columns.id.trim().toLowerCase(),
-    );
-    if (idColumn === -1) return false;
-
-    const offset = rows.findIndex((row) => String(row[idColumn] ?? '').trim() === id);
+    const offset = this.findRowOffset(header, rows, id);
     if (offset === -1) return false;
 
     const rowNumber = offset + 2; // +1 for the header row, +1 for 1-based indexing
@@ -180,12 +191,7 @@ export class SheetTable<S extends z.ZodType<Record<string, unknown>>> {
 
   async delete(id: string): Promise<boolean> {
     const { header, rows } = await this.rawRows();
-    const idColumn = header.findIndex(
-      (name) => name.trim().toLowerCase() === this.columns.id.trim().toLowerCase(),
-    );
-    if (idColumn === -1) return false;
-
-    const offset = rows.findIndex((row) => String(row[idColumn] ?? '').trim() === id);
+    const offset = this.findRowOffset(header, rows, id);
     if (offset === -1) return false;
 
     const sheets = sheetsClient();

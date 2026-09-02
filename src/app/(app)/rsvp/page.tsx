@@ -3,7 +3,7 @@ import { resolveYear } from '@/lib/year';
 import { today } from '@/lib/format';
 import { PageHeader, ErrorNotice } from '@/components/ui/primitives';
 import { RsvpTabs } from '@/components/rsvp-tabs';
-import { currentUser, canEdit } from '@/lib/auth';
+import { currentUser, canEdit, canDelete } from '@/lib/auth';
 import { redactRsvp } from '@/lib/redact';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +16,7 @@ export default async function RsvpPage({
   const year = resolveYear((await searchParams).year);
   const role = (await currentUser())?.role ?? 'viewer';
   const editable = canEdit(role);
-  const deletable = role === 'admin';
+  const deletable = canDelete(role);
 
   let rows;
   try {

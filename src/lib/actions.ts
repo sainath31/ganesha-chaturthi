@@ -49,13 +49,14 @@ export async function updateDonation(id: string, formData: FormData): Promise<Ac
     const existing = (await donations.list()).find((row) => row.id === id);
     if (!existing) return { ok: false, error: 'That donation no longer exists.' };
 
-    await donations.update(id, {
+    const updated = await donations.update(id, {
       ...existing,
       ...input,
       year: yearOf(input.date),
       recordedBy: user.email,
       recordedAt: new Date().toISOString(),
     });
+    if (!updated) return { ok: false, error: 'That donation no longer exists.' };
 
     revalidatePath('/donations');
     revalidatePath('/');
@@ -93,18 +94,20 @@ export async function createExpense(formData: FormData): Promise<ActionResult> {
     });
 
     const files = formData.getAll('receipts').filter((f): f is File => f instanceof File && f.size > 0);
-    for (const file of files) {
-      const uploaded = await uploadReceipt(file, { year });
-      await receipts.append({
-        ...uploaded,
-        id: newId('rec'),
-        year,
-        date: input.date,
-        expenseId: id,
-        uploadedBy: user.email,
-        uploadedAt: new Date().toISOString(),
-      });
-    }
+    const uploaded = await Promise.all(files.map((file) => uploadReceipt(file, { year })));
+    await Promise.all(
+      uploaded.map((file) =>
+        receipts.append({
+          ...file,
+          id: newId('rec'),
+          year,
+          date: input.date,
+          expenseId: id,
+          uploadedBy: user.email,
+          uploadedAt: new Date().toISOString(),
+        }),
+      ),
+    );
 
     revalidatePath('/expenses');
     revalidatePath('/receipts');
@@ -123,30 +126,33 @@ export async function updateExpense(id: string, formData: FormData): Promise<Act
     if (!existing) return { ok: false, error: 'That expense no longer exists.' };
 
     const year = yearOf(input.date);
-    await expenses.update(id, {
+    const updated = await expenses.update(id, {
       ...existing,
       ...input,
       year,
       recordedBy: user.email,
       recordedAt: new Date().toISOString(),
     });
+    if (!updated) return { ok: false, error: 'That expense no longer exists.' };
 
     // The edit dialog can attach further receipts to an expense already recorded.
     const files = formData
       .getAll('receipts')
       .filter((f): f is File => f instanceof File && f.size > 0);
-    for (const file of files) {
-      const uploaded = await uploadReceipt(file, { year });
-      await receipts.append({
-        ...uploaded,
-        id: newId('rec'),
-        year,
-        date: input.date,
-        expenseId: id,
-        uploadedBy: user.email,
-        uploadedAt: new Date().toISOString(),
-      });
-    }
+    const uploaded = await Promise.all(files.map((file) => uploadReceipt(file, { year })));
+    await Promise.all(
+      uploaded.map((file) =>
+        receipts.append({
+          ...file,
+          id: newId('rec'),
+          year,
+          date: input.date,
+          expenseId: id,
+          uploadedBy: user.email,
+          uploadedAt: new Date().toISOString(),
+        }),
+      ),
+    );
 
     revalidatePath('/expenses');
     revalidatePath('/receipts');
@@ -179,18 +185,20 @@ export async function uploadReceipts(formData: FormData): Promise<ActionResult> 
     const files = formData.getAll('receipts').filter((f): f is File => f instanceof File && f.size > 0);
     if (files.length === 0) return { ok: false, error: 'Choose at least one file to upload.' };
 
-    for (const file of files) {
-      const uploaded = await uploadReceipt(file, { year });
-      await receipts.append({
-        ...uploaded,
-        id: newId('rec'),
-        year,
-        date,
-        expenseId,
-        uploadedBy: user.email,
-        uploadedAt: new Date().toISOString(),
-      });
-    }
+    const uploaded = await Promise.all(files.map((file) => uploadReceipt(file, { year })));
+    await Promise.all(
+      uploaded.map((file) =>
+        receipts.append({
+          ...file,
+          id: newId('rec'),
+          year,
+          date,
+          expenseId,
+          uploadedBy: user.email,
+          uploadedAt: new Date().toISOString(),
+        }),
+      ),
+    );
 
     revalidatePath('/receipts');
     revalidatePath('/expenses');
@@ -252,13 +260,14 @@ export async function updateRsvp(id: string, formData: FormData): Promise<Action
     const existing = (await rsvps.list()).find((row) => row.id === id);
     if (!existing) return { ok: false, error: 'That RSVP no longer exists.' };
 
-    await rsvps.update(id, {
+    const updated = await rsvps.update(id, {
       ...existing,
       ...input,
       year: yearOf(input.date),
       recordedBy: user.email,
       recordedAt: new Date().toISOString(),
     });
+    if (!updated) return { ok: false, error: 'That RSVP no longer exists.' };
 
     revalidatePath('/rsvp');
     return { ok: true };

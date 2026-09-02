@@ -290,19 +290,36 @@ function ExpenseFields({ record, people }: { record: Expense; people: string[] }
   );
 }
 
+const FESTIVAL_YEAR = Number(FESTIVAL_START_DATE.slice(0, 4));
+
 function RsvpFields({ record }: { record: Rsvp }) {
-  // Session/time only apply to Daily Pooja; shown based on the record's
-  // current occasion (switching the dropdown below won't toggle these live).
-  const isDaily = record.occasion === 'Daily Pooja';
+  const [occasion, setOccasion] = useState(record.occasion);
+  const isDaily = occasion === 'Daily Pooja';
   const [session, setSession] = useState<(typeof RSVP_SESSIONS)[number]>(
     (record.session as (typeof RSVP_SESSIONS)[number]) || 'Morning',
   );
+  // Clamping the date to this year's festival window only makes sense while
+  // editing a record already in that year — otherwise it silently rewrites a
+  // past year's RSVP onto today's dates.
+  const inCurrentFestivalYear = record.year === FESTIVAL_YEAR;
 
   return (
     <>
-      <Select label="Occasion" name="occasion" options={RSVP_OCCASIONS} defaultValue={record.occasion} />
+      <Select
+        label="Occasion"
+        name="occasion"
+        options={RSVP_OCCASIONS}
+        value={occasion}
+        onChange={(v) => setOccasion(v as typeof occasion)}
+      />
       <Field label="Name" name="name" required defaultValue={record.name} />
-      <DateField label="Date" name="date" defaultValue={record.date} minDate={FESTIVAL_START_DATE} maxDate={FESTIVAL_END_DATE} />
+      <DateField
+        label="Date"
+        name="date"
+        defaultValue={record.date}
+        minDate={inCurrentFestivalYear ? FESTIVAL_START_DATE : undefined}
+        maxDate={inCurrentFestivalYear ? FESTIVAL_END_DATE : undefined}
+      />
       {isDaily ? (
         <Select label="Session" name="session" options={RSVP_SESSIONS} value={session} onChange={(v) => setSession(v as typeof session)} />
       ) : null}

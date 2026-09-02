@@ -29,6 +29,10 @@ export function canEdit(role: Role): boolean {
   return role === 'admin' || role === 'editor';
 }
 
+export function canDelete(role: Role): boolean {
+  return role === 'admin';
+}
+
 /**
  * Receipt images are gated separately from editing. By default any editor may
  * see them; setting RECEIPT_VIEWER_EMAILS narrows that to a named few, with

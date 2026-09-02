@@ -3,7 +3,7 @@ import { resolveYear } from '@/lib/year';
 import { formatMoney, today } from '@/lib/format';
 import { ViewerNotice, PageHeader, ErrorNotice } from '@/components/ui/primitives';
 import { DonationsBrowser } from '@/components/donations-browser';
-import { currentUser, canEdit } from '@/lib/auth';
+import { currentUser, canEdit, canDelete } from '@/lib/auth';
 import { redactDonation } from '@/lib/redact';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,7 @@ export default async function DonationsPage({
   const year = resolveYear(params.year);
   const role = (await currentUser())?.role ?? 'viewer';
   const editable = canEdit(role);
-  const deletable = role === 'admin';
+  const deletable = canDelete(role);
 
   let rows;
   try {

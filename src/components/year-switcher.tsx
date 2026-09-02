@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
+import { resolveYear } from '@/lib/resolve-year';
 
 /** Reads the selected year straight from the URL so every page stays in sync. */
 export function YearSwitcher({ years, fallback }: { years: number[]; fallback: number }) {
@@ -10,7 +11,7 @@ export function YearSwitcher({ years, fallback }: { years: number[]; fallback: n
   const params = useSearchParams();
   const [pending, startTransition] = useTransition();
 
-  const requested = Number.parseInt(params.get('year') ?? '', 10);
+  const requested = resolveYear(params.get('year') ?? undefined);
   const selected = years.includes(requested) ? requested : fallback;
 
   function choose(year: string) {

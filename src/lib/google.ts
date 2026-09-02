@@ -21,10 +21,15 @@ export function getAuthClient(): OAuth2Client {
   return cached;
 }
 
+let cachedSheets: ReturnType<typeof google.sheets> | null = null;
+let cachedDrive: ReturnType<typeof google.drive> | null = null;
+
 export function sheetsClient() {
-  return google.sheets({ version: 'v4', auth: getAuthClient() });
+  if (!cachedSheets) cachedSheets = google.sheets({ version: 'v4', auth: getAuthClient() });
+  return cachedSheets;
 }
 
 export function driveClient() {
-  return google.drive({ version: 'v3', auth: getAuthClient() });
+  if (!cachedDrive) cachedDrive = google.drive({ version: 'v3', auth: getAuthClient() });
+  return cachedDrive;
 }

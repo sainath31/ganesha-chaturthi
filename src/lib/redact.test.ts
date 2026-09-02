@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Donation, Expense, Receipt } from './schema';
+import type { Donation, Expense, Receipt, Rsvp } from './schema';
 
 // redact.ts pulls in auth.ts, which wires up next-auth at module scope and
 // pulls in `next/server` — unresolvable outside Next's own build. A stub is
@@ -7,7 +7,7 @@ import type { Donation, Expense, Receipt } from './schema';
 vi.mock('next-auth', () => ({ default: () => ({ handlers: {}, auth: vi.fn(), signIn: vi.fn(), signOut: vi.fn() }) }));
 vi.mock('next-auth/providers/google', () => ({ default: () => ({}) }));
 
-const { shortenName, scrubContacts, redactDonation, redactExpense, redactReceipt } = await import('./redact');
+const { shortenName, scrubContacts, redactDonation, redactExpense, redactRsvp, redactReceipt } = await import('./redact');
 
 describe('shortenName', () => {
   it('shortens a two-part name to first name + last initial', () => {
@@ -134,6 +134,41 @@ describe('redactExpense', () => {
   });
 });
 
+const baseRsvp: Rsvp = {
+  id: 'rsvp_1',
+  year: 2026,
+  occasion: 'Daily Pooja',
+  date: '2026-09-15',
+  name: 'Ram Reddy & Soumya',
+  adults: 2,
+  kids: 1,
+  session: 'Evening',
+  time: '18:30',
+  prasadam: 'Sweets, text 555-123-4567 when you arrive',
+  notes: 'Internal note',
+  recordedBy: 'someone@example.com',
+  recordedAt: '2026-08-10T10:00:00.000Z',
+};
+
+describe('redactRsvp', () => {
+  it('returns the row unchanged for an editor', () => {
+    expect(redactRsvp(baseRsvp, 'editor')).toEqual(baseRsvp);
+  });
+
+  it('shortens the name and scrubs contact info out of prasadam for a viewer', () => {
+    const redacted = redactRsvp(baseRsvp, 'viewer');
+    expect(redacted.name).toBe('Ram R.');
+    expect(redacted.prasadam).not.toContain('555-123-4567');
+    expect(redacted.prasadam).toContain('Sweets');
+  });
+
+  it('blanks notes and recordedBy for a viewer', () => {
+    const redacted = redactRsvp(baseRsvp, 'viewer');
+    expect(redacted.notes).toBe('');
+    expect(redacted.recordedBy).toBe('');
+  });
+});
+
 const baseReceipt: Receipt = {
   id: 'rec_1',
   year: 2026,
@@ -158,6 +193,7 @@ describe('redactReceipt', () => {
     expect(redacted.fileName).toBe('Receipt');
     expect(redacted.webViewLink).toBe('');
     expect(redacted.uploadedBy).toBe('');
+    expect(redacted.fileId).toBe('');
   });
 
   it('hides the file from an editor when receipt viewing is restricted to nobody they are in', () => {

@@ -58,6 +58,15 @@ describe('canEdit', () => {
   });
 });
 
+describe('canDelete', () => {
+  it('is true only for admin', async () => {
+    const { canDelete } = await import('./auth');
+    expect(canDelete('admin')).toBe(true);
+    expect(canDelete('editor')).toBe(false);
+    expect(canDelete('viewer')).toBe(false);
+  });
+});
+
 describe('canViewReceipts', () => {
   it('is always true for admin', async () => {
     const { canViewReceipts } = await import('./auth');

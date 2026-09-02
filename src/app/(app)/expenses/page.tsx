@@ -5,7 +5,7 @@ import { formatMoney, today } from '@/lib/format';
 import { ViewerNotice, PageHeader, ErrorNotice } from '@/components/ui/primitives';
 import { Table, Th, Td } from '@/components/ui/table';
 import { ExpensesBrowser } from '@/components/expenses-browser';
-import { currentUser, canEdit } from '@/lib/auth';
+import { currentUser, canEdit, canDelete } from '@/lib/auth';
 import { redactExpense, redactDonation } from '@/lib/redact';
 
 export const dynamic = 'force-dynamic';
@@ -19,7 +19,7 @@ export default async function ExpensesPage({
   const year = resolveYear(params.year);
   const role = (await currentUser())?.role ?? 'viewer';
   const editable = canEdit(role);
-  const deletable = role === 'admin';
+  const deletable = canDelete(role);
 
   let rows, donationRows, receiptRows;
   try {
@@ -57,37 +57,6 @@ export default async function ExpensesPage({
 
       {!editable ? <ViewerNotice /> : null}
 
-      {owed.length > 0 ? (
-        <div className="mb-6">
-          <h2 className="mb-3 font-display text-lg font-semibold">Reimbursements</h2>
-          <Table>
-            <thead>
-              <tr className="border-b border-line bg-raised/60">
-                <Th>Member</Th>
-                <Th align="right">Fronted</Th>
-                <Th align="right">Cleared</Th>
-                <Th align="right">Outstanding</Th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {owed.map((row) => (
-                <tr key={row.person}>
-                  <Td className="text-ink">{row.person}</Td>
-                  <Td align="right" className="tabular-nums text-muted">{formatMoney(row.total)}</Td>
-                  <Td align="right" className="tabular-nums text-positive">{formatMoney(row.cleared)}</Td>
-                  <Td
-                    align="right"
-                    className={`font-medium tabular-nums ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}
-                  >
-                    {formatMoney(row.pending)}
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      ) : null}
-
       {categories.length > 1 ? (
         <section className="card mb-6 p-5">
           <h2 className="font-display text-base font-semibold">
@@ -121,6 +90,37 @@ export default async function ExpensesPage({
         today={today()}
         year={year}
       />
+
+      {owed.length > 0 ? (
+        <div className="mt-6">
+          <h2 className="mb-3 font-display text-lg font-semibold">Reimbursements</h2>
+          <Table>
+            <thead>
+              <tr className="border-b border-line bg-raised/60">
+                <Th>Member</Th>
+                <Th align="right">Fronted</Th>
+                <Th align="right">Cleared</Th>
+                <Th align="right">Outstanding</Th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {owed.map((row) => (
+                <tr key={row.person}>
+                  <Td className="text-ink">{row.person}</Td>
+                  <Td align="right" className="tabular-nums text-muted">{formatMoney(row.total)}</Td>
+                  <Td align="right" className="tabular-nums text-positive">{formatMoney(row.cleared)}</Td>
+                  <Td
+                    align="right"
+                    className={`font-medium tabular-nums ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}
+                  >
+                    {formatMoney(row.pending)}
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      ) : null}
     </>
   );
 }

@@ -57,6 +57,11 @@ export function redactRsvp(row: Rsvp, role: Role): Rsvp {
   return {
     ...row,
     name: shortenName(row.name),
+    // Free text someone typed in, same treatment as an expense description:
+    // strip anything that reads like contact info rather than blanking it
+    // outright, since the prasadam details themselves are meant to stay
+    // visible.
+    prasadam: scrubContacts(row.prasadam),
     notes: '',
     recordedBy: '',
   };
@@ -67,7 +72,11 @@ export function redactReceipt(row: Receipt, role: Role, email?: string | null): 
   return {
     ...row,
     // The file itself is withheld from viewers, so its name — often a shop,
-    // a date, sometimes a person — goes with it.
+    // a date, sometimes a person — goes with it. fileId is cleared too: it's
+    // not rendered anywhere for a blocked viewer today, but there's no
+    // reason for a "redacted" object to still carry the real Drive file
+    // identifier a future caller might not know to keep hiding.
+    fileId: '',
     fileName: 'Receipt',
     webViewLink: '',
     uploadedBy: '',

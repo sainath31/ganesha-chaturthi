@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { formatBytes } from '@/lib/format';
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_EDGE = 2000;
@@ -112,7 +113,7 @@ export function ReceiptInput({ name }: { name: string }) {
               <span className="truncate text-xs text-ink">{file.name}</span>
               <span className="flex shrink-0 items-center gap-3">
                 <span className="text-xs tabular-nums text-faint">
-                  {(file.size / 1024).toFixed(0)} KB
+                  {formatBytes(file.size)}
                 </span>
                 <button
                   type="button"

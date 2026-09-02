@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { SheetTable } from './sheet-table';
 import {
   DONATION_COLUMNS,
@@ -33,7 +34,13 @@ export const accessRequests = new SheetTable(
   accessRequestSchema,
 );
 
+// Once a tab has been verified to exist with the right headers, it won't
+// stop existing — re-checking on every single page navigation for the life
+// of the server process is pure overhead, so this only actually runs once.
+let allTabsEnsured = false;
+
 export async function ensureAllTabs(): Promise<void> {
+  if (allTabsEnsured) return;
   // Sequential: each ensure() reads spreadsheet metadata that a previous
   // addSheet may have changed.
   await donations.ensure();
@@ -41,6 +48,14 @@ export async function ensureAllTabs(): Promise<void> {
   await receipts.ensure();
   await rsvps.ensure();
   await accessRequests.ensure();
+  allTabsEnsured = true;
+}
+
+/** "Paid directly" costs a family absorbed outright without claiming it
+ *  back — real spending, but it never touches the committee's pot, so every
+ *  aggregate below excludes it the same way. */
+function isCommitteeExpense(row: Expense): boolean {
+  return row.settlement !== 'Paid directly';
 }
 
 export function newId(prefix: string): string {
@@ -70,12 +85,10 @@ export function totals(donationRows: Donation[], expenseRows: Expense[]) {
     .filter((row) => row.status !== 'Paid')
     .reduce((sum, row) => sum + row.amount, 0);
 
-  // Costs a family absorbed outright are real spending but never touch the
-  // committee's pot, so they are reported separately rather than folded in.
-  const committeeExpenses = expenseRows.filter((row) => row.settlement !== 'Paid directly');
+  const committeeExpenses = expenseRows.filter(isCommitteeExpense);
   const spent = committeeExpenses.reduce((sum, row) => sum + row.amount, 0);
   const paidDirectly = expenseRows
-    .filter((row) => row.settlement === 'Paid directly')
+    .filter((row) => !isCommitteeExpense(row))
     .reduce((sum, row) => sum + row.amount, 0);
 
   return {
@@ -109,7 +122,7 @@ export function byCollector(donationRows: Donation[]) {
 export function reimbursements(expenseRows: Expense[]) {
   const groups = new Map<string, { person: string; total: number; cleared: number; pending: number }>();
   for (const row of expenseRows) {
-    if (row.settlement === 'Paid directly') continue;
+    if (!isCommitteeExpense(row)) continue;
     const person = row.paidBy.trim() || 'Unassigned';
     const existing = groups.get(person) ?? { person, total: 0, cleared: 0, pending: 0 };
     existing.total += row.amount;
@@ -128,7 +141,7 @@ export function reimbursements(expenseRows: Expense[]) {
 export function byCategory(expenseRows: Expense[]) {
   const groups = new Map<string, number>();
   for (const row of expenseRows) {
-    if (row.settlement === 'Paid directly') continue;
+    if (!isCommitteeExpense(row)) continue;
     groups.set(row.category, (groups.get(row.category) ?? 0) + row.amount);
   }
   return [...groups.entries()]
@@ -137,17 +150,24 @@ export function byCategory(expenseRows: Expense[]) {
 }
 
 
+// Deduped per request: the layout reads donations/expenses to compute the
+// year list, and the page below reads the exact same tabs again to render
+// rows — without this, that's two full Sheets reads apiece on every view.
+export const listDonations = cache(() => donations.list());
+export const listExpenses = cache(() => expenses.list());
+const listRsvps = cache(() => rsvps.list());
+
 /** Everything the app shows is read through these, so nothing leaks across years. */
 export async function donationsForYear(year: number): Promise<Donation[]> {
-  return (await donations.list()).filter((row) => row.year === year);
+  return (await listDonations()).filter((row) => row.year === year);
 }
 
 export async function expensesForYear(year: number): Promise<Expense[]> {
-  return (await expenses.list()).filter((row) => row.year === year);
+  return (await listExpenses()).filter((row) => row.year === year);
 }
 
 export async function rsvpsForYear(year: number): Promise<Rsvp[]> {
-  return (await rsvps.list()).filter((row) => row.year === year);
+  return (await listRsvps()).filter((row) => row.year === year);
 }
 
 /** How many are coming for food, split by age — the number catering needs to plan for. */

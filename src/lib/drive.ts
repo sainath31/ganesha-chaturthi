@@ -1,6 +1,8 @@
 import { Readable } from 'node:stream';
 import { driveClient } from './google';
 import { env } from './env';
+import { today } from './format';
+import { currentYear } from './year';
 
 export const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 
@@ -37,12 +39,12 @@ export async function uploadReceipt(
   }
 
   const drive = driveClient();
-  const parent = await ensureYearFolder(options.year ?? new Date().getFullYear());
+  const parent = await ensureYearFolder(options.year ?? currentYear());
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const created = await drive.files.create({
     requestBody: {
-      name: `${new Date().toISOString().slice(0, 10)} ${file.name}`,
+      name: `${today()} ${file.name}`,
       parents: [parent],
     },
     media: { mimeType: file.type, body: Readable.from(buffer) },
@@ -101,11 +103,10 @@ export async function fetchReceiptBytes(
   fileId: string,
 ): Promise<{ body: ArrayBuffer; mimeType: string }> {
   const drive = driveClient();
-  const meta = await drive.files.get({ fileId, fields: 'mimeType' });
-  const content = await drive.files.get(
-    { fileId, alt: 'media' },
-    { responseType: 'arraybuffer' },
-  );
+  const [meta, content] = await Promise.all([
+    drive.files.get({ fileId, fields: 'mimeType' }),
+    drive.files.get({ fileId, alt: 'media' }, { responseType: 'arraybuffer' }),
+  ]);
   return {
     body: content.data as ArrayBuffer,
     mimeType: meta.data.mimeType ?? 'application/octet-stream',

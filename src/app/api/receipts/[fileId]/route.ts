@@ -1,4 +1,4 @@
-import { auth, canViewReceipts } from '@/lib/auth';
+import { currentUser, canViewReceipts } from '@/lib/auth';
 import { fetchReceiptBytes } from '@/lib/drive';
 
 /**
@@ -13,8 +13,8 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ fileId: string }> },
 ) {
-  const session = await auth();
-  if (!canViewReceipts(session?.user?.role ?? 'viewer', session?.user?.email)) {
+  const user = await currentUser();
+  if (!canViewReceipts(user?.role ?? 'viewer', user?.email)) {
     return new Response('Receipts are visible to authorised committee members only.', {
       status: 403,
     });
