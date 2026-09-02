@@ -45,7 +45,7 @@ export function Modal({
    */
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex h-[100dvh] items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -61,10 +61,15 @@ export function Modal({
            has long-standing bugs where `position: sticky` fails to stick
            inside a `position: fixed` ancestor, which silently dropped the
            header (and made the body appear un-scrollable) on phones.
+           max-h uses dvh (dynamic viewport height), not vh: on real phones,
+           `vh` is based on the layout viewport, which can be taller than
+           what's actually visible once the browser's address bar is
+           accounted for, sizing the panel — and pushing its own header
+           above the visible screen — using the wrong, larger height.
            text-left is deliberate: the dialog is rendered from inside a
            right-aligned table cell, whose alignment it would otherwise
            inherit and apply to every label in the form. */
-        className="enter flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl border border-line bg-surface text-left shadow-lift outline-none sm:rounded-2xl"
+        className="enter flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-2xl border border-line bg-surface text-left shadow-lift outline-none sm:rounded-2xl"
       >
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-line bg-surface px-6 py-4">
           <h2 className="font-display text-lg font-semibold">{title}</h2>
