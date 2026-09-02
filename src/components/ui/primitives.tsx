@@ -119,11 +119,7 @@ export function ViewerNotice() {
       </span>
       <p className="text-sm text-muted">
         You are viewing the public summary. Household names are shortened and lanes, notes and
-        receipt images are hidden.{' '}
-        <a href="/signin" className="font-medium text-brand underline underline-offset-2">
-          Sign in
-        </a>{' '}
-        to see full details.
+        receipt images are hidden.
       </p>
     </div>
   );

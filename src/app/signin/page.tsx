@@ -54,10 +54,6 @@ export default async function SignInPage({
               </button>
             </form>
 
-            <p className="mt-4 text-center text-xs text-faint">
-              Sign-in is limited to invited accounts.
-            </p>
-
             {/* "Request access" form disabled for now — access is granted
                 manually. Re-add <RequestAccessForm /> (from
                 '@/components/request-access-form') here to turn it back on;
