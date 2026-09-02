@@ -69,11 +69,13 @@ export function ExpensesBrowser({
               key={row.id}
               title={row.description}
               amount={formatMoney(row.amount)}
-              meta={[formatDate(row.date), row.store || null, `Paid by ${row.paidBy}`].filter(Boolean).join(' · ')}
+              meta={[formatDate(row.date), row.store || null, editable ? `Paid by ${row.paidBy}` : null]
+                .filter(Boolean)
+                .join(' · ')}
               badges={
                 <>
                   <Badge>{row.category}</Badge>
-                  <Badge tone={row.settlement === 'Cleared' ? 'brand' : 'neutral'}>{row.settlement}</Badge>
+                  <Badge tone={row.settlement === 'Cleared' ? 'brand' : 'neutral'}>{settlementLabel(row.settlement)}</Badge>
                   {(receiptCount.get(row.id) ?? 0) > 0 ? (
                     <Badge>
                       {receiptCount.get(row.id)} receipt{receiptCount.get(row.id) === 1 ? '' : 's'}
@@ -96,7 +98,7 @@ export function ExpensesBrowser({
                   <Th>Description</Th>
                   <Th>Category</Th>
                   <Th>Store</Th>
-                  <Th>Paid by</Th>
+                  {editable ? <Th>Paid by</Th> : null}
                   <Th align="right">Amount</Th>
                   <Th>Settlement</Th>
                   <Th align="right">Receipts</Th>
@@ -113,12 +115,12 @@ export function ExpensesBrowser({
                     </Td>
                     <Td className="whitespace-nowrap text-muted">{row.category}</Td>
                     <Td className="text-muted">{row.store || 'N/A'}</Td>
-                    <Td className="whitespace-nowrap text-muted">{row.paidBy}</Td>
+                    {editable ? <Td className="whitespace-nowrap text-muted">{row.paidBy}</Td> : null}
                     <Td align="right" className="font-medium tabular-nums text-ink">
                       {formatMoney(row.amount)}
                     </Td>
                     <Td>
-                      <Badge tone={row.settlement === 'Cleared' ? 'brand' : 'neutral'}>{row.settlement}</Badge>
+                      <Badge tone={row.settlement === 'Cleared' ? 'brand' : 'neutral'}>{settlementLabel(row.settlement)}</Badge>
                     </Td>
                     <Td align="right" className="tabular-nums text-muted">
                       {receiptCount.get(row.id) ?? 0}
@@ -133,7 +135,7 @@ export function ExpensesBrowser({
               </tbody>
               <tfoot>
                 <tr className="border-t border-line bg-raised/60">
-                  <Td colSpan={5} className="font-medium text-muted">
+                  <Td colSpan={editable ? 5 : 4} className="font-medium text-muted">
                     {sorted.length} {sorted.length === 1 ? 'entry' : 'entries'}
                     {q ? ' matching' : ''}
                   </Td>
@@ -156,4 +158,10 @@ export function ExpensesBrowser({
       ) : null}
     </>
   );
+}
+
+/** "Pending" alone read oddly once the payer's name is hidden from viewers, since
+ *  it wasn't clear what was pending. Spelled out, it stands on its own. */
+function settlementLabel(settlement: Expense['settlement']): string {
+  return settlement === 'Pending' ? 'Pending payment' : settlement;
 }
