@@ -109,7 +109,7 @@ export function byCollector(donationRows: Donation[]) {
   for (const row of donationRows) {
     if (row.status !== 'Paid') continue;
     const collector = row.collectedBy.trim();
-    const key = row.method === 'Cash' || !collector ? row.method : `${row.method} (${collector})`;
+    const key = collector ? `${row.method} (${collector})` : row.method;
     const existing = groups.get(key) ?? { key, method: row.method, total: 0, count: 0 };
     existing.total += row.amount;
     existing.count += 1;

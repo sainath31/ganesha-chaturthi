@@ -171,9 +171,14 @@ describe('reimbursements', () => {
 });
 
 describe('byCollector', () => {
-  it('groups cash donations without a collector suffix', () => {
+  it('groups cash donations without a collector suffix when none is recorded', () => {
     const result = byCollector([donation({ method: 'Cash', collectedBy: '', amount: 100 })]);
     expect(result[0]).toMatchObject({ key: 'Cash', total: 100, count: 1 });
+  });
+
+  it('groups cash donations with a "Cash (Collector)" key when a collector is recorded', () => {
+    const result = byCollector([donation({ method: 'Cash', collectedBy: 'Rama S', amount: 100 })]);
+    expect(result[0].key).toBe('Cash (Rama S)');
   });
 
   it('groups non-cash donations with a "Method (Collector)" key', () => {
