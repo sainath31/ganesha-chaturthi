@@ -3,6 +3,7 @@
 import { createExpense } from '@/lib/actions';
 import { EXPENSE_CATEGORIES, SETTLEMENT_STATUSES } from '@/lib/schema';
 import { FormPanel, Field, Select } from './form-panel';
+import { DateField } from './date-time-fields';
 import { ReceiptInput } from './receipt-input';
 
 export function ExpenseForm({ today, people }: { today: string; people: string[] }) {
@@ -14,7 +15,7 @@ export function ExpenseForm({ today, people }: { today: string; people: string[]
       action={createExpense}
     >
       <Field label="Description" name="description" required placeholder="Pooja items, fruits" span />
-      <Field label="Date" name="date" type="date" required defaultValue={today} />
+      <DateField label="Date" name="date" defaultValue={today} />
       <Field label="Amount" name="amount" type="number" step="0.01" required placeholder="53.87" />
       <Select label="Category" name="category" options={EXPENSE_CATEGORIES} />
       <Field label="Store" name="store" placeholder="Costco" />

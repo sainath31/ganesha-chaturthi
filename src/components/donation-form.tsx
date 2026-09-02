@@ -3,6 +3,7 @@
 import { createDonation } from '@/lib/actions';
 import { PAYMENT_METHODS, DONATION_STATUSES, FOOD_RSVP } from '@/lib/schema';
 import { FormPanel, Field, Select } from './form-panel';
+import { DateField } from './date-time-fields';
 
 export function DonationForm({ today, lanes }: { today: string; lanes: string[] }) {
   return (
@@ -13,7 +14,7 @@ export function DonationForm({ today, lanes }: { today: string; lanes: string[] 
       action={createDonation}
     >
       <Field label="Name" name="name" required placeholder="Family or contributor name" span />
-      <Field label="Date" name="date" type="date" required defaultValue={today} />
+      <DateField label="Date" name="date" defaultValue={today} />
       <Field label="Amount" name="amount" type="number" step="0.01" required placeholder="100.00" />
       <div className="min-w-0">
         <label className="label" htmlFor="lane">

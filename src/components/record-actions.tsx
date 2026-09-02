@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal } from './modal';
 import { Field, Select } from './form-panel';
+import { DateField, TimeField } from './date-time-fields';
 import { useToast } from './toast';
 import { ReceiptInput } from './receipt-input';
 import {
@@ -194,7 +195,7 @@ function DonationFields({ record, lanes }: { record: Donation; lanes: string[] }
   return (
     <>
       <Field label="Name" name="name" required defaultValue={record.name} span />
-      <Field label="Date" name="date" type="date" required defaultValue={record.date} />
+      <DateField label="Date" name="date" defaultValue={record.date} />
       <Field
         label="Amount"
         name="amount"
@@ -240,7 +241,7 @@ function ExpenseFields({ record, people }: { record: Expense; people: string[] }
   return (
     <>
       <Field label="Description" name="description" required defaultValue={record.description} span />
-      <Field label="Date" name="date" type="date" required defaultValue={record.date} />
+      <DateField label="Date" name="date" defaultValue={record.date} />
       <Field
         label="Amount"
         name="amount"
@@ -298,11 +299,11 @@ function RsvpFields({ record }: { record: Rsvp }) {
     <>
       <Select label="Occasion" name="occasion" options={RSVP_OCCASIONS} defaultValue={record.occasion} />
       <Field label="Name" name="name" required defaultValue={record.name} />
-      <Field label="Date" name="date" type="date" required defaultValue={record.date} />
+      <DateField label="Date" name="date" defaultValue={record.date} />
       {isDaily ? (
         <Select label="Session" name="session" options={RSVP_SESSIONS} defaultValue={record.session || 'Morning'} />
       ) : null}
-      {isDaily ? <Field label="Time" name="time" type="time" defaultValue={record.time} /> : null}
+      {isDaily ? <TimeField label="Time" name="time" defaultValue={record.time} /> : null}
       <Field label="Adults" name="adults" type="number" defaultValue={record.adults} />
       <Field label="Kids" name="kids" type="number" defaultValue={record.kids} />
       <Field label="Prasadam details" name="prasadam" defaultValue={record.prasadam} span />

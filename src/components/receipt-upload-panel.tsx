@@ -1,7 +1,8 @@
 'use client';
 
 import { uploadReceipts } from '@/lib/actions';
-import { FormPanel, Field } from './form-panel';
+import { FormPanel } from './form-panel';
+import { DateField } from './date-time-fields';
 import { ReceiptInput } from './receipt-input';
 
 export function ReceiptUploadPanel({
@@ -18,7 +19,7 @@ export function ReceiptUploadPanel({
       submitLabel="Upload to Drive"
       action={uploadReceipts}
     >
-      <Field label="Date on the bill" name="date" type="date" required defaultValue={today} />
+      <DateField label="Date on the bill" name="date" defaultValue={today} />
       <div className="min-w-0">
         <label className="label" htmlFor="expenseId">
           Attach to expense (optional)

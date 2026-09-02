@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createRsvp } from '@/lib/actions';
 import { RSVP_SESSIONS, type RsvpOccasion } from '@/lib/schema';
 import { Field, Select } from './form-panel';
+import { DateField, TimeField } from './date-time-fields';
 import { Modal } from './modal';
 import { useToast } from './toast';
 
@@ -52,9 +53,9 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
             <input type="hidden" name="occasion" value={occasion} />
             <div className="grid gap-4 overflow-x-hidden sm:grid-cols-2">
               <Field label="Name" name="name" required placeholder="Family or attendee name" span />
-              <Field label="Date" name="date" type="date" required defaultValue={today} />
+              <DateField label="Date" name="date" defaultValue={today} />
               {isDaily ? <Select label="Session" name="session" options={RSVP_SESSIONS} defaultValue="Morning" /> : null}
-              {isDaily ? <Field label="Time" name="time" type="time" /> : null}
+              {isDaily ? <TimeField label="Time" name="time" /> : null}
               <Field label="Adults" name="adults" type="number" defaultValue={1} />
               <Field label="Kids" name="kids" type="number" defaultValue={0} />
               <Field
