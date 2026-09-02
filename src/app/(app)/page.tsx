@@ -78,7 +78,12 @@ export default async function DashboardPage({
           hint={summary.pledged > 0 ? `${formatMoney(summary.pledged)} pledged` : undefined}
           tone="positive"
         />
-        <StatTile label="Spent" value={formatMoney(summary.spent)} hint={`${summary.expenseCount} entries`} />
+        <StatTile
+          label="Spent"
+          value={formatMoney(summary.spent)}
+          hint={`${summary.expenseCount} entries`}
+          tone="accent"
+        />
         <StatTile
           label={summary.balance < 0 ? 'Shortfall' : 'Remaining'}
           value={formatMoney(Math.abs(summary.balance))}

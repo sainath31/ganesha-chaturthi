@@ -60,7 +60,7 @@ export default async function ReportsPage({
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         <StatTile label="Total received" value={formatMoney(summary.collected)} tone="positive" />
-        <StatTile label="Total spent" value={formatMoney(summary.spent)} />
+        <StatTile label="Total spent" value={formatMoney(summary.spent)} tone="accent" />
         <StatTile
           label={summary.balance < 0 ? 'Shortfall' : 'Balance remaining'}
           value={formatMoney(Math.abs(summary.balance))}

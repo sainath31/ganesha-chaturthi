@@ -31,13 +31,17 @@ export function StatTile({
   label: string;
   value: string;
   hint?: string;
-  tone?: 'neutral' | 'positive' | 'negative' | 'brand';
+  tone?: 'neutral' | 'positive' | 'negative' | 'brand' | 'accent';
 }) {
   const toneClass = {
     neutral: 'text-ink',
     positive: 'text-positive',
     negative: 'text-negative',
     brand: 'text-brand',
+    // Dedicated to "spent/expenses" specifically, so it matches the Balance
+    // meter's Spent bar and the category breakdown chart — not to be reused
+    // for anything else, or the same inconsistency creeps back in.
+    accent: 'text-accent',
   }[tone];
 
   return (

@@ -21,7 +21,7 @@ export function CategoryBars({ data }: { data: { category: string; total: number
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-raised">
             <div
-              className="h-full rounded-full bg-brand"
+              className="h-full rounded-full bg-accent"
               style={{ width: `${Math.max((row.total / max) * 100, 2)}%` }}
             />
           </div>
