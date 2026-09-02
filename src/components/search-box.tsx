@@ -14,7 +14,12 @@ export function SearchBox({
 }) {
   return (
     <input
-      type="search"
+      type="text"
+      inputMode="search"
+      autoComplete="off"
+      autoCorrect="off"
+      autoCapitalize="off"
+      spellCheck={false}
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
