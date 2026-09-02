@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { donationsForYear, expensesForYear, totals, byCategory, reimbursements, byCollector } from '@/lib/repository';
 import { resolveYear } from '@/lib/year';
-import { currentUser } from '@/lib/auth';
+import { currentUser, canEdit } from '@/lib/auth';
 import { redactDonation, redactExpense } from '@/lib/redact';
 import { formatMoney } from '@/lib/format';
 import { PageHeader, StatTile, EmptyState, ErrorNotice } from '@/components/ui/primitives';
@@ -32,10 +32,15 @@ export default async function DashboardPage({
     );
   }
 
+  const editable = canEdit(role);
   const summary = totals(donationRows, expenseRows);
   const categories = byCategory(expenseRows).slice(0, 8);
   const owed = reimbursements(expenseRows).filter((row) => row.pending > 0);
-  const collectors = byCollector(donationRows);
+  // Who received the money is committee-internal; the public view sees the
+  // method totals only, not which member collected each one.
+  const collectors = byCollector(
+    editable ? donationRows : donationRows.map((row) => ({ ...row, collectedBy: '' })),
+  );
 
   if (donationRows.length === 0 && expenseRows.length === 0) {
     return (
@@ -126,7 +131,9 @@ export default async function DashboardPage({
 
         <section className="card p-6">
           <h2 className="mb-1 font-display text-lg font-semibold">Where the money came in</h2>
-          <p className="mb-4 text-sm text-muted">Grouped by method and who received it.</p>
+          <p className="mb-4 text-sm text-muted">
+            {editable ? 'Grouped by method and who received it.' : 'Grouped by payment method.'}
+          </p>
           {collectors.length ? (
             <ul className="divide-y divide-line">
               {collectors.map((row) => (
