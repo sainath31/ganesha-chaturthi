@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import { signIn } from '@/lib/auth';
 import { ToastProvider } from '@/components/toast';
-import { RequestAccessForm } from '@/components/request-access-form';
 
 export default async function SignInPage({
   searchParams,
@@ -59,9 +58,10 @@ export default async function SignInPage({
               Access is limited to committee members.
             </p>
 
-            <div className="mt-5 flex justify-center border-t border-line pt-5">
-              <RequestAccessForm />
-            </div>
+            {/* "Request access" form disabled for now — access is granted
+                manually. Re-add <RequestAccessForm /> (from
+                '@/components/request-access-form') here to turn it back on;
+                the underlying action, sheet tab and email notify still work. */}
           </div>
         </div>
       </main>
