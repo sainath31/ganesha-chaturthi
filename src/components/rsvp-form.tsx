@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createRsvp } from '@/lib/actions';
 import { RSVP_SESSIONS, type RsvpOccasion } from '@/lib/schema';
 import { Field, Select } from './form-panel';
-import { DateField, TimeField, FESTIVAL_START_DATE, FESTIVAL_END_DATE } from './date-time-fields';
+import { DateField, TimeField, FESTIVAL_START_DATE, FESTIVAL_END_DATE, DAILY_POOJA_START_DATE } from './date-time-fields';
 import { Modal } from './modal';
 import { useToast } from './toast';
 
@@ -18,10 +18,17 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<(typeof RSVP_SESSIONS)[number]>('Morning');
+  const [date, setDate] = useState(today);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   const toast = useToast();
   const isDaily = occasion === 'Daily Pooja';
+  // The last day closes before evening — nothing is scheduled that night.
+  const sessionsAllowed = date === FESTIVAL_END_DATE ? RSVP_SESSIONS.filter((s) => s === 'Morning') : RSVP_SESSIONS;
+
+  if (isDaily && date === FESTIVAL_END_DATE && session !== 'Morning') {
+    setSession('Morning');
+  }
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,11 +65,12 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
                 label="Date"
                 name="date"
                 defaultValue={today}
-                minDate={FESTIVAL_START_DATE}
-                maxDate={FESTIVAL_END_DATE}
+                minDate={isDaily ? DAILY_POOJA_START_DATE : FESTIVAL_START_DATE}
+                maxDate={isDaily ? FESTIVAL_END_DATE : FESTIVAL_START_DATE}
+                onChange={setDate}
               />
               {isDaily ? (
-                <Select label="Session" name="session" options={RSVP_SESSIONS} value={session} onChange={(v) => setSession(v as typeof session)} />
+                <Select label="Session" name="session" options={sessionsAllowed} value={session} onChange={(v) => setSession(v as typeof session)} />
               ) : null}
               {isDaily ? (
                 <TimeField label="Time" name="time" autoPeriod={session === 'Morning' ? 'AM' : 'PM'} />

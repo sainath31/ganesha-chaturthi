@@ -21,6 +21,8 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
  *  makes sense to record or RSVP for. Update these each year. */
 export const FESTIVAL_START_DATE = '2026-09-14';
 export const FESTIVAL_END_DATE = '2026-09-20';
+/** Daily Pooja runs the day after First Day Pooja through the last day. */
+export const DAILY_POOJA_START_DATE = '2026-09-15';
 
 function pad(n: number): string {
   return String(n).padStart(2, '0');
@@ -42,6 +44,7 @@ export function DateField({
   minDate,
   maxDate,
   span,
+  onChange,
 }: {
   label: string;
   name: string;
@@ -52,6 +55,9 @@ export function DateField({
   minDate?: string;
   maxDate?: string;
   span?: boolean;
+  /** Reports the resolved (clamped) ISO value on every change, for a sibling
+   *  field that depends on the chosen date (e.g. which sessions are open). */
+  onChange?: (value: string) => void;
 }) {
   const initial = parseIsoDate(defaultValue);
   const min = minDate ? parseIsoDate(minDate) : null;
@@ -81,6 +87,13 @@ export function DateField({
   // pick here — just the one year that's already selected (today's, or an
   // existing record's).
   const years = [year];
+
+  useEffect(() => {
+    onChange?.(value);
+    // Only the resolved value should trigger this — including `onChange`
+    // itself would re-run on every parent render if it's an inline function.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
   return (
     <div className={span ? 'sm:col-span-2' : undefined}>
