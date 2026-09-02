@@ -55,21 +55,28 @@ export default async function ExpensesPage({
       />
 
       {owed.length > 0 ? (
-        <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {owed.map((row) => (
-            <div key={row.person} className="card p-4">
-              <p className="truncate text-xs font-medium uppercase tracking-wide text-faint">
-                {row.person}
-              </p>
-              <p className="mt-1.5 font-display text-xl font-semibold tabular-nums">
-                {formatMoney(row.total)}
-              </p>
-              <p className="text-[11px] text-faint">fronted</p>
-              <p className={`mt-1 text-xs ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}>
-                {row.pending > 0 ? `${formatMoney(row.pending)} outstanding` : 'Settled'}
-              </p>
-            </div>
-          ))}
+        <div className="mb-6">
+          <h2 className="mb-1 font-display text-lg font-semibold">Reimbursements</h2>
+          <p className="mb-4 text-sm text-muted">
+            One card per committee member who fronted money, what they paid out and whether
+            it's been paid back.
+          </p>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {owed.map((row) => (
+              <div key={row.person} className="card p-4">
+                <p className="truncate text-xs font-medium uppercase tracking-wide text-faint">
+                  {row.person}
+                </p>
+                <p className="mt-1.5 font-display text-xl font-semibold tabular-nums">
+                  {formatMoney(row.total)}
+                </p>
+                <p className="text-[11px] text-faint">fronted</p>
+                <p className={`mt-1 text-xs ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}>
+                  {row.pending > 0 ? `${formatMoney(row.pending)} outstanding` : 'Settled'}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 
