@@ -90,6 +90,19 @@
     background-size: 1rem;
     padding-right: 2.25rem;
   }
+
+  /* iOS Safari's native date/time widget has its own internal minimum
+     width, tied to font-size, that CSS width/max-width alone cannot fully
+     override in a narrow container — confirmed on real devices where every
+     other field fit but Date/Time still didn't, even after those fixes.
+     Shrinking the font (WebKit does scale the widget's internal rendering
+     with it) plus tighter side padding reclaims the room this needs. */
+  input[type='date'].field,
+  input[type='time'].field {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 0.8125rem;
+  }
 }
 
 @layer base {
