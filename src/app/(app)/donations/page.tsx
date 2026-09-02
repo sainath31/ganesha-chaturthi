@@ -21,7 +21,12 @@ export default async function DonationsPage({
 
   let rows;
   try {
-    rows = (await donationsForYear(year)).map((row) => redactDonation(row, role));
+    rows = (await donationsForYear(year)).map((row) => ({
+      ...redactDonation(row, role),
+      // Search still matches the full name/collector even though the
+      // display is shortened for a public viewer — it's never rendered.
+      searchText: `${row.name} ${row.collectedBy}`,
+    }));
   } catch (error) {
     return <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />;
   }

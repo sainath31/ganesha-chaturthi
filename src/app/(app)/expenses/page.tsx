@@ -28,7 +28,12 @@ export default async function ExpensesPage({
       donationsForYear(year),
       receiptTable.list(),
     ]);
-    rows = rawExpenses.map((row) => redactExpense(row, role));
+    rows = rawExpenses.map((row) => ({
+      ...redactExpense(row, role),
+      // Search still matches the full payer name even though the display is
+      // shortened for a public viewer — it's never rendered.
+      searchText: row.paidBy,
+    }));
     donationRows = rawDonations.map((row) => redactDonation(row, role));
     receiptRows = rawReceipts;
   } catch (error) {

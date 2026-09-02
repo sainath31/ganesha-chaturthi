@@ -20,7 +20,7 @@ export function ExpensesBrowser({
   today,
   year,
 }: {
-  rows: Expense[];
+  rows: (Expense & { searchText: string })[];
   editable: boolean;
   deletable: boolean;
   people: string[];
@@ -34,7 +34,7 @@ export function ExpensesBrowser({
   const sorted = useMemo(() => {
     const filtered = q
       ? rows.filter((row) =>
-          [row.description, row.category, row.store, row.paidBy, row.notes]
+          [row.description, row.category, row.store, row.paidBy, row.notes, row.searchText]
             .join(' ')
             .toLowerCase()
             .includes(q),

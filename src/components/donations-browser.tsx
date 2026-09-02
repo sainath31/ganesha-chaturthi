@@ -23,7 +23,7 @@ export function DonationsBrowser({
   today,
   year,
 }: {
-  rows: Donation[];
+  rows: (Donation & { searchText: string })[];
   editable: boolean;
   deletable: boolean;
   lanes: string[];
@@ -36,7 +36,7 @@ export function DonationsBrowser({
   const sorted = useMemo(() => {
     const filtered = q
       ? rows.filter((row) =>
-          [row.name, row.lane, row.collectedBy, row.notes, row.receiptNo]
+          [row.name, row.lane, row.collectedBy, row.notes, row.receiptNo, row.searchText]
             .join(' ')
             .toLowerCase()
             .includes(q),
