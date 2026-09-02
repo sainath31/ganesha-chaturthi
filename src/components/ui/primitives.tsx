@@ -72,9 +72,25 @@ export function EmptyState({
   );
 }
 
-export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'brand' }) {
-  const toneClass =
-    tone === 'brand' ? 'bg-brand/10 text-brand' : 'bg-raised text-muted';
+/**
+ * Tone is semantic, not decorative — keep it consistent with the same
+ * concept everywhere it shows up: positive for money received/settled/
+ * cleared, negative for pending/outstanding, brand only for a neutral
+ * highlight that isn't "good" or "bad" (e.g. a plain status label).
+ */
+export function Badge({
+  children,
+  tone = 'neutral',
+}: {
+  children: ReactNode;
+  tone?: 'neutral' | 'brand' | 'positive' | 'negative';
+}) {
+  const toneClass = {
+    neutral: 'bg-raised text-muted',
+    brand: 'bg-brand/10 text-brand',
+    positive: 'bg-positive/10 text-positive',
+    negative: 'bg-negative/10 text-negative',
+  }[tone];
   return (
     <span className={`inline-flex rounded-lg px-2 py-0.5 text-xs font-medium ${toneClass}`}>
       {children}

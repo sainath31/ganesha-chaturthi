@@ -75,7 +75,7 @@ export function ExpensesBrowser({
               badges={
                 <>
                   <Badge>{row.category}</Badge>
-                  <Badge tone={row.settlement === 'Cleared' ? 'brand' : 'neutral'}>{settlementLabel(row.settlement)}</Badge>
+                  <Badge tone={row.settlement === 'Cleared' ? 'positive' : row.settlement === 'Pending' ? 'negative' : 'neutral'}>{settlementLabel(row.settlement)}</Badge>
                   {(receiptCount.get(row.id) ?? 0) > 0 ? (
                     <Badge>
                       {receiptCount.get(row.id)} receipt{receiptCount.get(row.id) === 1 ? '' : 's'}
@@ -120,7 +120,7 @@ export function ExpensesBrowser({
                       {formatMoney(row.amount)}
                     </Td>
                     <Td>
-                      <Badge tone={row.settlement === 'Cleared' ? 'brand' : 'neutral'}>{settlementLabel(row.settlement)}</Badge>
+                      <Badge tone={row.settlement === 'Cleared' ? 'positive' : row.settlement === 'Pending' ? 'negative' : 'neutral'}>{settlementLabel(row.settlement)}</Badge>
                     </Td>
                     <Td align="right" className="tabular-nums text-muted">
                       {receiptCount.get(row.id) ?? 0}

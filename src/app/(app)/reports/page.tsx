@@ -64,7 +64,7 @@ export default async function ReportsPage({
         <StatTile
           label={summary.balance < 0 ? 'Shortfall' : 'Balance remaining'}
           value={formatMoney(Math.abs(summary.balance))}
-          tone={summary.balance < 0 ? 'negative' : 'brand'}
+          tone={summary.balance < 0 ? 'negative' : 'positive'}
         />
       </div>
 

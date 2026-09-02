@@ -73,7 +73,7 @@ export function DonationsBrowser({
                 .join(' · ')}
               badges={
                 <>
-                  <Badge tone={row.status === 'Paid' ? 'brand' : 'neutral'}>{row.status}</Badge>
+                  <Badge tone={row.status === 'Paid' ? 'positive' : 'negative'}>{row.status}</Badge>
                   {row.votedForFood !== 'No response' ? <Badge>Food: {row.votedForFood}</Badge> : null}
                   {row.foodAdults + row.foodKids > 0 ? (
                     <Badge>
@@ -117,7 +117,7 @@ export function DonationsBrowser({
                       {formatMoney(row.amount)}
                     </Td>
                     <Td>
-                      <Badge tone={row.status === 'Paid' ? 'brand' : 'neutral'}>{row.status}</Badge>
+                      <Badge tone={row.status === 'Paid' ? 'positive' : 'negative'}>{row.status}</Badge>
                     </Td>
                     <Td className="text-muted">{row.votedForFood}</Td>
                     {editable || deletable ? (

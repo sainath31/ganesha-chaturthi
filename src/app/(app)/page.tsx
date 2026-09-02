@@ -82,7 +82,7 @@ export default async function DashboardPage({
         <StatTile
           label={summary.balance < 0 ? 'Shortfall' : 'Remaining'}
           value={formatMoney(Math.abs(summary.balance))}
-          tone={summary.balance < 0 ? 'negative' : 'brand'}
+          tone={summary.balance < 0 ? 'negative' : 'positive'}
         />
         <StatTile label="Families" value={String(summary.donorCount)} />
       </div>
