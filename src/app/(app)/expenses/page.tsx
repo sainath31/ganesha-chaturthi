@@ -56,11 +56,7 @@ export default async function ExpensesPage({
 
       {owed.length > 0 ? (
         <div className="mb-6">
-          <h2 className="mb-1 font-display text-lg font-semibold">Reimbursements</h2>
-          <p className="mb-4 text-sm text-muted">
-            One card per committee member who fronted money, what they paid out and whether
-            it's been paid back.
-          </p>
+          <h2 className="mb-4 font-display text-lg font-semibold">Reimbursements</h2>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {owed.map((row) => (
               <div key={row.person} className="card p-4">
