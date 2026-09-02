@@ -134,7 +134,7 @@ export default async function ReportsPage({
                 <Td align="right" className="tabular-nums text-positive">{formatMoney(row.cleared)}</Td>
                 <Td
                   align="right"
-                  className={`font-medium tabular-nums ${row.pending > 0 ? 'text-negative' : 'text-muted'}`}
+                  className={`font-medium tabular-nums ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}
                 >
                   {formatMoney(row.pending)}
                 </Td>
@@ -153,7 +153,7 @@ export default async function ReportsPage({
               <Td
                 align="right"
                 className={`font-display font-semibold tabular-nums ${
-                  settlementTotals.pending > 0 ? 'text-negative' : 'text-muted'
+                  settlementTotals.pending > 0 ? 'text-negative' : 'text-positive'
                 }`}
               >
                 {formatMoney(settlementTotals.pending)}
