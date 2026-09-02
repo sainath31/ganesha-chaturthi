@@ -30,8 +30,8 @@ export function DonationForm({ today, lanes }: { today: string; lanes: string[] 
       <Field label="Collected by" name="collectedBy" placeholder="Committee member who received it" />
       <Select label="Status" name="status" options={DONATION_STATUSES} />
       <Select label="Voted for food" name="votedForFood" options={FOOD_RSVP} defaultValue="No response" />
-      <Field label="Food — adults" name="foodAdults" type="number" defaultValue={0} />
-      <Field label="Food — kids" name="foodKids" type="number" defaultValue={0} />
+      <Field label="Food adults" name="foodAdults" type="number" defaultValue={0} />
+      <Field label="Food kids" name="foodKids" type="number" defaultValue={0} />
       <Field label="Notes" name="notes" span />
     </FormPanel>
   );

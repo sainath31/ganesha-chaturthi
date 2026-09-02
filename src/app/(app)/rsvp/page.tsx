@@ -31,7 +31,7 @@ export default async function RsvpPage({
 
   return (
     <>
-      <PageHeader title="Pooja RSVP" subtitle={`${year} · two separate sign-ups — pick the one you're attending`} />
+      <PageHeader title="Pooja RSVP" subtitle={`${year} · two separate sign-ups, pick the one you're attending`} />
 
       <div className="space-y-10">
         {RSVP_OCCASIONS.map((occasion) => (
@@ -61,6 +61,9 @@ function OccasionSection({
 }) {
   const sorted = [...rows].sort((a, b) => b.date.localeCompare(a.date));
   const headcount = rsvpHeadcount(rows);
+  const isDaily = occasion === 'Daily Pooja';
+  const sessionLabel = (row: Rsvp) =>
+    [row.session, row.time].filter(Boolean).join(' · ') || null;
 
   return (
     <section>
@@ -69,8 +72,8 @@ function OccasionSection({
           <h2 className="font-display text-xl font-semibold tracking-tight">{occasion}</h2>
           <p className="mt-1 text-sm text-muted">
             {occasion === 'First Day Pooja'
-              ? 'The big first-day sit-down — one RSVP per family.'
-              : "Day-by-day RSVPs for the rest of the festival — attendance and prasadam per day."}
+              ? 'The big first-day sit-down, one RSVP per family.'
+              : 'Day-by-day RSVPs for the rest of the festival, attendance and prasadam per day.'}
           </p>
         </div>
         <RsvpForm today={today()} occasion={occasion} />
@@ -84,7 +87,7 @@ function OccasionSection({
       {sorted.length === 0 ? (
         <EmptyState
           title={`No RSVPs yet for ${occasion}`}
-          description="Anyone can add one here — no sign-in needed."
+          description="Anyone can add one here, no sign-in needed."
         />
       ) : (
         <ResponsiveRecords
@@ -95,7 +98,9 @@ function OccasionSection({
               key={row.id}
               title={row.name}
               amount={`${row.adults + row.kids}`}
-              meta={[formatDate(row.date), row.prasadam || null].filter(Boolean).join(' · ')}
+              meta={[formatDate(row.date), isDaily ? sessionLabel(row) : null, row.prasadam || null]
+                .filter(Boolean)
+                .join(' · ')}
               badges={
                 <>
                   <Badge>{row.adults} adults</Badge>
@@ -115,6 +120,7 @@ function OccasionSection({
                 <tr className="border-b border-line bg-raised/60">
                   <Th>Date</Th>
                   <Th>Name</Th>
+                  {isDaily ? <Th>Session</Th> : null}
                   <Th align="right">Adults</Th>
                   <Th align="right">Kids</Th>
                   <Th>Prasadam</Th>
@@ -129,9 +135,10 @@ function OccasionSection({
                       {row.name}
                       {row.notes ? <span className="block text-xs text-faint">{row.notes}</span> : null}
                     </Td>
+                    {isDaily ? <Td className="whitespace-nowrap text-muted">{sessionLabel(row) ?? 'N/A'}</Td> : null}
                     <Td align="right" className="tabular-nums text-ink">{row.adults}</Td>
                     <Td align="right" className="tabular-nums text-ink">{row.kids}</Td>
-                    <Td className="text-muted">{row.prasadam || '—'}</Td>
+                    <Td className="text-muted">{row.prasadam || 'N/A'}</Td>
                     {editable || deletable ? (
                       <Td align="right">
                         <RecordActions kind="rsvp" record={row} canEdit={editable} canDelete={deletable} />
@@ -142,7 +149,7 @@ function OccasionSection({
               </tbody>
               <tfoot>
                 <tr className="border-t border-line bg-raised/60">
-                  <Td colSpan={2} className="font-medium text-muted">
+                  <Td colSpan={isDaily ? 3 : 2} className="font-medium text-muted">
                     {sorted.length} {sorted.length === 1 ? 'entry' : 'entries'}
                   </Td>
                   <Td align="right" className="font-display font-semibold tabular-nums">

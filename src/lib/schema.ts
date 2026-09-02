@@ -47,6 +47,10 @@ export type SettlementStatus = (typeof SETTLEMENT_STATUSES)[number];
 export const RSVP_OCCASIONS = ['First Day Pooja', 'Daily Pooja'] as const;
 export type RsvpOccasion = (typeof RSVP_OCCASIONS)[number];
 
+/** Which sitting of a Daily Pooja — not applicable to First Day Pooja, which is one big event. */
+export const RSVP_SESSIONS = ['Morning', 'Evening'] as const;
+export type RsvpSession = (typeof RSVP_SESSIONS)[number];
+
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD');
 const money = z.coerce.number().finite();
 const text = z.coerce.string().trim().default('');
@@ -141,6 +145,9 @@ export const rsvpSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   adults: headcount,
   kids: headcount,
+  /** Only meaningful for Daily Pooja — blank for First Day Pooja rows. */
+  session: z.union([z.enum(RSVP_SESSIONS), z.literal('')]).default(''),
+  time: text,
   prasadam: text,
   notes: text,
   recordedBy: text,
@@ -212,6 +219,8 @@ export const RSVP_COLUMNS: Record<keyof Rsvp, string> = {
   name: 'Name',
   adults: 'Adults',
   kids: 'Kids',
+  session: 'Session',
+  time: 'Time',
   prasadam: 'Prasadam Details',
   notes: 'Notes',
   recordedBy: 'Recorded By',

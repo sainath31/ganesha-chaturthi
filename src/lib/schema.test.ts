@@ -202,6 +202,25 @@ describe('rsvpSchema', () => {
   it('rejects a negative headcount', () => {
     expect(rsvpSchema.safeParse({ ...validRsvp, adults: -2 }).success).toBe(false);
   });
+
+  it('defaults session to blank for First Day Pooja (no session needed)', () => {
+    const result = rsvpSchema.safeParse(validRsvp);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.session).toBe('');
+  });
+
+  it('accepts Morning or Evening for a Daily Pooja session', () => {
+    const result = rsvpSchema.safeParse({ ...validRsvp, occasion: 'Daily Pooja', session: 'Evening', time: '18:30' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.session).toBe('Evening');
+      expect(result.data.time).toBe('18:30');
+    }
+  });
+
+  it('rejects a session value outside Morning/Evening', () => {
+    expect(rsvpSchema.safeParse({ ...validRsvp, session: 'Afternoon' }).success).toBe(false);
+  });
 });
 
 const validAccessRequest = {

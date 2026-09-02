@@ -60,6 +60,8 @@ function rsvp(overrides: Partial<Rsvp>): Rsvp {
     name: 'Someone',
     adults: 2,
     kids: 0,
+    session: '',
+    time: '',
     prasadam: '',
     notes: '',
     recordedBy: '',
@@ -174,9 +176,9 @@ describe('byCollector', () => {
     expect(result[0]).toMatchObject({ key: 'Cash', total: 100, count: 1 });
   });
 
-  it('groups non-cash donations with a "Method — Collector" key', () => {
+  it('groups non-cash donations with a "Method (Collector)" key', () => {
     const result = byCollector([donation({ method: 'Zelle', collectedBy: 'Mamatha', amount: 75 })]);
-    expect(result[0].key).toBe('Zelle — Mamatha');
+    expect(result[0].key).toBe('Zelle (Mamatha)');
   });
 
   it('excludes unpaid (pledged/pending) donations', () => {

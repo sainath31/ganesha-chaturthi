@@ -42,7 +42,7 @@ export async function uploadReceipt(
 
   const created = await drive.files.create({
     requestBody: {
-      name: `${new Date().toISOString().slice(0, 10)} — ${file.name}`,
+      name: `${new Date().toISOString().slice(0, 10)} ${file.name}`,
       parents: [parent],
     },
     media: { mimeType: file.type, body: Readable.from(buffer) },

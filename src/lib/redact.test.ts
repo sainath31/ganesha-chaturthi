@@ -37,11 +37,11 @@ describe('shortenName', () => {
 
 describe('scrubContacts', () => {
   it('redacts an email address', () => {
-    expect(scrubContacts('Contact me at ram@example.com please')).toBe('Contact me at — please');
+    expect(scrubContacts('Contact me at ram@example.com please')).toBe('Contact me at Hidden please');
   });
 
   it('redacts a phone number', () => {
-    expect(scrubContacts('Call 555-123-4567 anytime')).toBe('Call — anytime');
+    expect(scrubContacts('Call 555-123-4567 anytime')).toBe('Call Hidden anytime');
   });
 
   it('leaves ordinary text untouched', () => {
@@ -80,7 +80,7 @@ describe('redactDonation', () => {
   it('redacts identifying fields for a viewer', () => {
     const redacted = redactDonation(baseDonation, 'viewer');
     expect(redacted.name).toBe('Ram R.');
-    expect(redacted.lane).toBe('—');
+    expect(redacted.lane).toBe('Hidden');
     expect(redacted.collectedBy).toBe('Rama S.');
     expect(redacted.notes).toBe('');
     expect(redacted.recordedBy).toBe('');

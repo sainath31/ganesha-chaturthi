@@ -18,7 +18,7 @@ export function shortenName(name: string): string {
   return second ? `${first} ${second[0].toUpperCase()}.` : first;
 }
 
-const HIDDEN = '—';
+const HIDDEN = 'Hidden';
 
 /** Anything that reads like an email or a phone number, wherever it turns up. */
 export function scrubContacts(value: string): string {

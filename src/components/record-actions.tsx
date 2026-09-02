@@ -22,6 +22,7 @@ import {
   EXPENSE_CATEGORIES,
   SETTLEMENT_STATUSES,
   RSVP_OCCASIONS,
+  RSVP_SESSIONS,
   type Donation,
   type Expense,
   type Rsvp,
@@ -228,8 +229,8 @@ function DonationFields({ record, lanes }: { record: Donation; lanes: string[] }
         options={FOOD_RSVP}
         defaultValue={record.votedForFood}
       />
-      <Field label="Food — adults" name="foodAdults" type="number" defaultValue={record.foodAdults} />
-      <Field label="Food — kids" name="foodKids" type="number" defaultValue={record.foodKids} />
+      <Field label="Food adults" name="foodAdults" type="number" defaultValue={record.foodAdults} />
+      <Field label="Food kids" name="foodKids" type="number" defaultValue={record.foodKids} />
       <Field label="Notes" name="notes" defaultValue={record.notes} span />
     </>
   );
@@ -289,11 +290,19 @@ function ExpenseFields({ record, people }: { record: Expense; people: string[] }
 }
 
 function RsvpFields({ record }: { record: Rsvp }) {
+  // Session/time only apply to Daily Pooja; shown based on the record's
+  // current occasion (switching the dropdown below won't toggle these live).
+  const isDaily = record.occasion === 'Daily Pooja';
+
   return (
     <>
       <Select label="Occasion" name="occasion" options={RSVP_OCCASIONS} defaultValue={record.occasion} />
       <Field label="Name" name="name" required defaultValue={record.name} />
       <Field label="Date" name="date" type="date" required defaultValue={record.date} />
+      {isDaily ? (
+        <Select label="Session" name="session" options={RSVP_SESSIONS} defaultValue={record.session || 'Morning'} />
+      ) : null}
+      {isDaily ? <Field label="Time" name="time" type="time" defaultValue={record.time} /> : null}
       <Field label="Adults" name="adults" type="number" defaultValue={record.adults} />
       <Field label="Kids" name="kids" type="number" defaultValue={record.kids} />
       <Field label="Prasadam details" name="prasadam" defaultValue={record.prasadam} span />

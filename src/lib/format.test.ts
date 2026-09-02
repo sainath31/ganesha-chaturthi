@@ -28,8 +28,8 @@ describe('formatDate', () => {
     expect(formatDate('2026-08-15')).toBe('Aug 15, 2026');
   });
 
-  it('returns an em dash for an empty string', () => {
-    expect(formatDate('')).toBe('—');
+  it('returns a placeholder for an empty string', () => {
+    expect(formatDate('')).toBe('Not set');
   });
 
   it('falls back to the raw string for an unparsable date', () => {
@@ -38,8 +38,8 @@ describe('formatDate', () => {
 });
 
 describe('formatBytes', () => {
-  it('returns an em dash for zero bytes', () => {
-    expect(formatBytes(0)).toBe('—');
+  it('returns "0 B" for zero bytes', () => {
+    expect(formatBytes(0)).toBe('0 B');
   });
 
   it('formats bytes under 1KB', () => {

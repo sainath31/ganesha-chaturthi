@@ -21,7 +21,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: 'Ganesha Chaturthi — Committee Accounts',
+  title: 'Ganesha Chaturthi Committee Accounts',
   description: 'Donations, expenses and receipts for the Ganesha Chaturthi committee.',
 };
 

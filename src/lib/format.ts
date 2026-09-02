@@ -10,7 +10,7 @@ export function formatMoney(amount: number, options: { compact?: boolean } = {})
 }
 
 export function formatDate(iso: string): string {
-  if (!iso) return '—';
+  if (!iso) return 'Not set';
   const date = new Date(`${iso}T00:00:00`);
   if (Number.isNaN(date.getTime())) return iso;
   return new Intl.DateTimeFormat(env.locale, {
@@ -21,7 +21,7 @@ export function formatDate(iso: string): string {
 }
 
 export function formatBytes(bytes: number): string {
-  if (!bytes) return '—';
+  if (!bytes) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB'];
   const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   return `${(bytes / 1024 ** exponent).toFixed(exponent === 0 ? 0 : 1)} ${units[exponent]}`;

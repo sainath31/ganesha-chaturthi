@@ -40,7 +40,7 @@ export function FormPanel({
       if (result.ok) {
         form.reset();
         setOpen(false);
-        toast(`${title} — saved.`);
+        toast(`${title} saved.`);
         router.refresh();
       } else {
         setError(result.error);
