@@ -108,7 +108,10 @@ export function Field({
   step?: string;
 }) {
   return (
-    <div className={span ? 'sm:col-span-2' : undefined}>
+    // min-w-0 overrides the grid item's default min-width:auto — without it,
+    // a date/time input's native internal content can force this cell (and
+    // the row) wider than the container, overflowing the form on phones.
+    <div className={`min-w-0 ${span ? 'sm:col-span-2' : ''}`}>
       <label className="label" htmlFor={name}>
         {label}
       </label>
@@ -120,7 +123,7 @@ export function Field({
         required={required}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="field"
+        className="field min-w-0"
       />
     </div>
   );
@@ -138,11 +141,11 @@ export function Select({
   defaultValue?: string;
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <label className="label" htmlFor={name}>
         {label}
       </label>
-      <select id={name} name={name} defaultValue={defaultValue} className="field">
+      <select id={name} name={name} defaultValue={defaultValue} className="field min-w-0">
         {options.map((option) => (
           <option key={option} value={option}>
             {option}
