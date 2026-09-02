@@ -50,7 +50,7 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
         <Modal title={`${occasion} RSVP`} onClose={() => setOpen(false)}>
           <form onSubmit={onSubmit}>
             <input type="hidden" name="occasion" value={occasion} />
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 overflow-x-hidden sm:grid-cols-2">
               <Field label="Name" name="name" required placeholder="Family or attendee name" span />
               <Field label="Date" name="date" type="date" required defaultValue={today} />
               {isDaily ? <Select label="Session" name="session" options={RSVP_SESSIONS} defaultValue="Morning" /> : null}

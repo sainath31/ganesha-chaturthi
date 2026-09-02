@@ -60,7 +60,7 @@ export function FormPanel({
     <form onSubmit={onSubmit} className="card w-full p-6">
       <h2 className="mb-5 font-display text-lg font-semibold">{title}</h2>
 
-      <div className="grid gap-4 sm:grid-cols-2">{children}</div>
+      <div className="grid gap-4 overflow-x-hidden sm:grid-cols-2">{children}</div>
 
       {error ? (
         <p role="alert" className="mt-4 rounded-xl bg-negative/10 px-3 py-2 text-sm text-negative">
