@@ -1,6 +1,6 @@
 import { donationsForYear, expensesForYear, totals, byCategory, byCollector, reimbursements } from '@/lib/repository';
 import { resolveYear } from '@/lib/year';
-import { currentUser } from '@/lib/auth';
+import { currentUser, canEdit } from '@/lib/auth';
 import { redactDonation, redactExpense } from '@/lib/redact';
 import { formatMoney } from '@/lib/format';
 import { PageHeader, StatTile, ErrorNotice } from '@/components/ui/primitives';
@@ -31,9 +31,14 @@ export default async function ReportsPage({
     return <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />;
   }
 
+  const editable = canEdit(role);
   const summary = totals(donationRows, expenseRows);
   const categories = byCategory(expenseRows);
-  const collectors = byCollector(donationRows);
+  // Who received or fronted money is committee-internal; the public
+  // statement shows method/category totals only, not member names.
+  const collectors = byCollector(
+    editable ? donationRows : donationRows.map((row) => ({ ...row, collectedBy: '' })),
+  );
   const settlements = reimbursements(expenseRows);
   const settlementTotals = settlements.reduce(
     (acc, row) => ({
