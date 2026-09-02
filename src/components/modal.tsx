@@ -56,12 +56,17 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        /* text-left is deliberate: the dialog is rendered from inside a
+        /* flex-col with a shrink-0 header + independently scrolling body,
+           rather than a sticky header inside one scrolling box: iOS Safari
+           has long-standing bugs where `position: sticky` fails to stick
+           inside a `position: fixed` ancestor, which silently dropped the
+           header (and made the body appear un-scrollable) on phones.
+           text-left is deliberate: the dialog is rendered from inside a
            right-aligned table cell, whose alignment it would otherwise
            inherit and apply to every label in the form. */
-        className="enter max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-line bg-surface text-left shadow-lift outline-none sm:rounded-2xl"
+        className="enter flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-2xl border border-line bg-surface text-left shadow-lift outline-none sm:rounded-2xl"
       >
-        <div className="sticky top-0 flex items-center justify-between gap-4 border-b border-line bg-surface px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-line bg-surface px-6 py-4">
           <h2 className="font-display text-lg font-semibold">{title}</h2>
           <button
             type="button"
@@ -79,7 +84,7 @@ export function Modal({
             </svg>
           </button>
         </div>
-        <div className="p-6">{children}</div>
+        <div className="overflow-y-auto p-6">{children}</div>
       </div>
     </div>,
     document.body,
