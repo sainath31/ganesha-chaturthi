@@ -15,11 +15,11 @@ export function DonationForm({ today, lanes }: { today: string; lanes: string[] 
       <Field label="Name" name="name" required placeholder="Family or contributor name" span />
       <Field label="Date" name="date" type="date" required defaultValue={today} />
       <Field label="Amount" name="amount" type="number" step="0.01" required placeholder="100.00" />
-      <div>
+      <div className="min-w-0">
         <label className="label" htmlFor="lane">
           Lane
         </label>
-        <input id="lane" name="lane" list="lanes" className="field" placeholder="Ellsworth Pl" />
+        <input id="lane" name="lane" list="lanes" className="field min-w-0" placeholder="Ellsworth Pl" />
         <datalist id="lanes">
           {lanes.map((lane) => (
             <option key={lane} value={lane} />

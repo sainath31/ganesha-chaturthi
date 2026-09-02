@@ -19,11 +19,11 @@ export function ReceiptUploadPanel({
       action={uploadReceipts}
     >
       <Field label="Date on the bill" name="date" type="date" required defaultValue={today} />
-      <div>
+      <div className="min-w-0">
         <label className="label" htmlFor="expenseId">
           Attach to expense (optional)
         </label>
-        <select id="expenseId" name="expenseId" className="field" defaultValue="">
+        <select id="expenseId" name="expenseId" className="field min-w-0" defaultValue="">
           <option value="">Not linked to an expense</option>
           {expenses.map((expense) => (
             <option key={expense.id} value={expense.id}>

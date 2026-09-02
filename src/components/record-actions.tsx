@@ -203,7 +203,7 @@ function DonationFields({ record, lanes }: { record: Donation; lanes: string[] }
         required
         defaultValue={record.amount}
       />
-      <div>
+      <div className="min-w-0">
         <label className="label" htmlFor={`lane-${record.id}`}>
           Lane
         </label>
@@ -212,7 +212,7 @@ function DonationFields({ record, lanes }: { record: Donation; lanes: string[] }
           name="lane"
           list="lanes-edit"
           defaultValue={record.lane}
-          className="field"
+          className="field min-w-0"
         />
         <datalist id="lanes-edit">
           {lanes.map((lane) => (
@@ -256,7 +256,7 @@ function ExpenseFields({ record, people }: { record: Expense; people: string[] }
         defaultValue={record.category}
       />
       <Field label="Store" name="store" defaultValue={record.store} />
-      <div>
+      <div className="min-w-0">
         <label className="label" htmlFor={`paidBy-${record.id}`}>
           Paid by
         </label>
@@ -266,7 +266,7 @@ function ExpenseFields({ record, people }: { record: Expense; people: string[] }
           list="people-edit"
           required
           defaultValue={record.paidBy}
-          className="field"
+          className="field min-w-0"
         />
         <datalist id="people-edit">
           {people.map((person) => (

@@ -18,11 +18,11 @@ export function ExpenseForm({ today, people }: { today: string; people: string[]
       <Field label="Amount" name="amount" type="number" step="0.01" required placeholder="53.87" />
       <Select label="Category" name="category" options={EXPENSE_CATEGORIES} />
       <Field label="Store" name="store" placeholder="Costco" />
-      <div>
+      <div className="min-w-0">
         <label className="label" htmlFor="paidBy">
           Paid by
         </label>
-        <input id="paidBy" name="paidBy" list="people" required className="field" placeholder="Who fronted the money" />
+        <input id="paidBy" name="paidBy" list="people" required className="field min-w-0" placeholder="Who fronted the money" />
         <datalist id="people">
           {people.map((person) => (
             <option key={person} value={person} />
