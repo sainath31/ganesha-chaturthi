@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createRsvp } from '@/lib/actions';
 import { RSVP_SESSIONS, type RsvpOccasion } from '@/lib/schema';
 import { Field, Select } from './form-panel';
-import { DateField, TimeField } from './date-time-fields';
+import { DateField, TimeField, FESTIVAL_START_DATE, FESTIVAL_END_DATE } from './date-time-fields';
 import { Modal } from './modal';
 import { useToast } from './toast';
 
@@ -17,6 +17,7 @@ import { useToast } from './toast';
 export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOccasion }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState<(typeof RSVP_SESSIONS)[number]>('Morning');
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   const toast = useToast();
@@ -53,9 +54,19 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
             <input type="hidden" name="occasion" value={occasion} />
             <div className="grid gap-4 overflow-x-hidden sm:grid-cols-2">
               <Field label="Name" name="name" required placeholder="Family or attendee name" span />
-              <DateField label="Date" name="date" defaultValue={today} />
-              {isDaily ? <Select label="Session" name="session" options={RSVP_SESSIONS} defaultValue="Morning" /> : null}
-              {isDaily ? <TimeField label="Time" name="time" /> : null}
+              <DateField
+                label="Date"
+                name="date"
+                defaultValue={today}
+                minDate={FESTIVAL_START_DATE}
+                maxDate={FESTIVAL_END_DATE}
+              />
+              {isDaily ? (
+                <Select label="Session" name="session" options={RSVP_SESSIONS} value={session} onChange={(v) => setSession(v as typeof session)} />
+              ) : null}
+              {isDaily ? (
+                <TimeField label="Time" name="time" autoPeriod={session === 'Morning' ? 'AM' : 'PM'} />
+              ) : null}
               <Field label="Adults" name="adults" type="number" defaultValue={1} />
               <Field label="Kids" name="kids" type="number" defaultValue={0} />
               <Field

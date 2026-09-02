@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal } from './modal';
 import { Field, Select } from './form-panel';
-import { DateField, TimeField } from './date-time-fields';
+import { DateField, TimeField, FESTIVAL_START_DATE, FESTIVAL_END_DATE } from './date-time-fields';
 import { useToast } from './toast';
 import { ReceiptInput } from './receipt-input';
 import {
@@ -294,16 +294,21 @@ function RsvpFields({ record }: { record: Rsvp }) {
   // Session/time only apply to Daily Pooja; shown based on the record's
   // current occasion (switching the dropdown below won't toggle these live).
   const isDaily = record.occasion === 'Daily Pooja';
+  const [session, setSession] = useState<(typeof RSVP_SESSIONS)[number]>(
+    (record.session as (typeof RSVP_SESSIONS)[number]) || 'Morning',
+  );
 
   return (
     <>
       <Select label="Occasion" name="occasion" options={RSVP_OCCASIONS} defaultValue={record.occasion} />
       <Field label="Name" name="name" required defaultValue={record.name} />
-      <DateField label="Date" name="date" defaultValue={record.date} />
+      <DateField label="Date" name="date" defaultValue={record.date} minDate={FESTIVAL_START_DATE} maxDate={FESTIVAL_END_DATE} />
       {isDaily ? (
-        <Select label="Session" name="session" options={RSVP_SESSIONS} defaultValue={record.session || 'Morning'} />
+        <Select label="Session" name="session" options={RSVP_SESSIONS} value={session} onChange={(v) => setSession(v as typeof session)} />
       ) : null}
-      {isDaily ? <TimeField label="Time" name="time" defaultValue={record.time} /> : null}
+      {isDaily ? (
+        <TimeField label="Time" name="time" defaultValue={record.time} autoPeriod={session === 'Morning' ? 'AM' : 'PM'} />
+      ) : null}
       <Field label="Adults" name="adults" type="number" defaultValue={record.adults} />
       <Field label="Kids" name="kids" type="number" defaultValue={record.kids} />
       <Field label="Prasadam details" name="prasadam" defaultValue={record.prasadam} span />

@@ -134,18 +134,27 @@ export function Select({
   name,
   options,
   defaultValue,
+  value,
+  onChange,
 }: {
   label: string;
   name: string;
   options: readonly string[];
   defaultValue?: string;
+  /** Pass value+onChange together to make this controlled (e.g. so another
+   *  field can react to the choice); omit both for plain uncontrolled use. */
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
+  const controlledProps =
+    value !== undefined ? { value, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => onChange?.(e.target.value) } : { defaultValue };
+
   return (
     <div className="min-w-0">
       <label className="label" htmlFor={name}>
         {label}
       </label>
-      <select id={name} name={name} defaultValue={defaultValue} className="field min-w-0">
+      <select id={name} name={name} className="field min-w-0" {...controlledProps}>
         {options.map((option) => (
           <option key={option} value={option}>
             {option}
