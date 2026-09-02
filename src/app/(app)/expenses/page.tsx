@@ -55,6 +55,8 @@ export default async function ExpensesPage({
         subtitle={`${year} · ${formatMoney(summary.spent)} spent of ${formatMoney(summary.collected)} collected`}
       />
 
+      {!editable ? <ViewerNotice /> : null}
+
       {owed.length > 0 ? (
         <div className="mb-6">
           <h2 className="mb-3 font-display text-lg font-semibold">Reimbursements</h2>
@@ -85,8 +87,6 @@ export default async function ExpensesPage({
           </Table>
         </div>
       ) : null}
-
-      {!editable ? <ViewerNotice /> : null}
 
       {categories.length > 1 ? (
         <details className="card mb-6 p-5">

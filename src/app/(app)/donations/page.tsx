@@ -60,6 +60,8 @@ export default async function DonationsPage({
           .join(' · ')}
       />
 
+      {!editable ? <ViewerNotice /> : null}
+
       {laneTotals.length > 1 ? (
         <section className="card mb-6 p-5">
           <h2 className="mb-4 font-display text-base font-semibold">Collected by lane</h2>
@@ -79,8 +81,6 @@ export default async function DonationsPage({
           </ul>
         </section>
       ) : null}
-
-      {!editable ? <ViewerNotice /> : null}
 
       <DonationsBrowser rows={rows} editable={editable} deletable={deletable} lanes={lanes} today={today()} year={year} />
     </>
