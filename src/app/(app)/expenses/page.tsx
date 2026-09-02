@@ -64,7 +64,8 @@ export default async function ExpensesPage({
               <p className="mt-1.5 font-display text-xl font-semibold tabular-nums">
                 {formatMoney(row.total)}
               </p>
-              <p className={`mt-0.5 text-xs ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}>
+              <p className="text-[11px] text-faint">fronted</p>
+              <p className={`mt-1 text-xs ${row.pending > 0 ? 'text-negative' : 'text-positive'}`}>
                 {row.pending > 0 ? `${formatMoney(row.pending)} outstanding` : 'Settled'}
               </p>
             </div>
