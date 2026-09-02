@@ -55,7 +55,7 @@ export default async function SignInPage({
             </form>
 
             <p className="mt-4 text-center text-xs text-faint">
-              Access is limited to committee members.
+              Sign-in is limited to invited accounts.
             </p>
 
             {/* "Request access" form disabled for now — access is granted
