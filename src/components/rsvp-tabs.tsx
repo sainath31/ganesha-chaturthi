@@ -28,7 +28,7 @@ const TAB_LABEL: Record<RsvpOccasion, { short: string; long: string }> = {
   // Making today) is introduced inside the tab, so a second event later
   // slots in without renaming the tab itself.
   'Ganesha Idol Making': { short: 'Events', long: 'Events' },
-  'Nimarjan Food': { short: 'Food', long: 'Nimarjan Food' },
+  'Nimarjan Food': { short: 'Nimarjan Food', long: 'Nimarjan Food' },
 };
 
 /**
