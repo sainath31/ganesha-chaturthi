@@ -145,6 +145,10 @@ export const rsvpSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   adults: headcount,
   kids: headcount,
+  /** Guests beyond the family's own headcount — only meaningful for Nimarjan
+   *  Food, so catering gets one true total rather than a per-family guess. */
+  guestAdults: headcount,
+  guestKids: headcount,
   /** Only meaningful for Daily Pooja — blank for First Day Pooja rows. */
   session: z.union([z.enum(RSVP_SESSIONS), z.literal('')]).default(''),
   time: text,
@@ -216,6 +220,8 @@ export const RSVP_COLUMNS: Record<keyof Rsvp, string> = {
   name: 'Name',
   adults: 'Adults',
   kids: 'Kids',
+  guestAdults: 'Guest Adults',
+  guestKids: 'Guest Kids',
   session: 'Session',
   time: 'Time',
   prasadam: 'Prasadam Details',

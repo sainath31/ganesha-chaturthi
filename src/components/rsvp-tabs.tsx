@@ -8,6 +8,7 @@ import { RsvpForm } from './rsvp-form';
 import { ResponsiveRecords, RecordCard, Th, Td } from './record-list';
 import { RecordActions } from './record-actions';
 import { RSVP_OCCASIONS, type Rsvp, type RsvpOccasion } from '@/lib/schema';
+import { EVENT_DATE_LABEL } from './date-time-fields';
 
 /** Client-safe mirror of repository.ts's rsvpHeadcount — that module also
  *  pulls in the server-only Google API client, which can't be bundled here. */
@@ -109,13 +110,18 @@ function OccasionContent({
 }) {
   const sorted = [...rows].sort((a, b) => b.date.localeCompare(a.date));
   const headcount = rsvpHeadcount(rows);
+  const guestHeadcount = rows.reduce(
+    (acc, row) => ({ adults: acc.adults + row.guestAdults, kids: acc.kids + row.guestKids }),
+    { adults: 0, kids: 0 },
+  );
   const isDaily = occasion === 'Daily Pooja';
   const isEvent = occasion === 'Ganesha Idol Making';
   const isFoodDay = occasion === 'Nimarjan Food';
   const showPrasadam = occasion === 'First Day Pooja' || occasion === 'Daily Pooja';
-  const adultsLabel = isEvent ? 'Accompanying adults' : isFoodDay ? 'Adults count' : 'Adults';
-  const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Child count' : 'Kids';
+  const adultsLabel = isEvent ? 'Accompanying adults' : isFoodDay ? 'Family adults' : 'Adults';
+  const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Family children' : 'Kids';
   const sessionLabel = (row: Rsvp) => [row.session, row.time].filter(Boolean).join(' · ') || null;
+  const extraColumns = (showPrasadam ? 1 : 0) + (editable || deletable ? 1 : 0);
 
   return (
     <section>
@@ -126,6 +132,12 @@ function OccasionContent({
       <div className="mb-4 grid grid-cols-2 gap-3 sm:max-w-md">
         <StatTile label={adultsLabel} value={String(headcount.adults)} />
         <StatTile label={kidsLabel} value={String(headcount.kids)} />
+        {isFoodDay ? (
+          <>
+            <StatTile label="Guest adults" value={String(guestHeadcount.adults)} />
+            <StatTile label="Guest children" value={String(guestHeadcount.kids)} />
+          </>
+        ) : null}
       </div>
 
       {sorted.length === 0 ? (
@@ -136,12 +148,16 @@ function OccasionContent({
       ) : (
         <ResponsiveRecords
           count={`${sorted.length} ${sorted.length === 1 ? 'entry' : 'entries'}`}
-          total={`${headcount.adults} adults + ${headcount.kids} kids`}
+          total={
+            isFoodDay
+              ? `${headcount.adults + guestHeadcount.adults} adults + ${headcount.kids + guestHeadcount.kids} kids`
+              : `${headcount.adults} adults + ${headcount.kids} kids`
+          }
           cards={sorted.map((row) => (
             <RecordCard
               key={row.id}
               title={row.name}
-              amount={`${row.adults + row.kids}`}
+              amount={`${row.adults + row.kids + row.guestAdults + row.guestKids}`}
               meta={[formatDate(row.date), isDaily ? sessionLabel(row) : null, showPrasadam ? row.prasadam || null : null]
                 .filter(Boolean)
                 .join(' · ')}
@@ -149,6 +165,11 @@ function OccasionContent({
                 <>
                   <Badge>{row.adults} adults</Badge>
                   <Badge>{row.kids} kids</Badge>
+                  {isFoodDay && (row.guestAdults > 0 || row.guestKids > 0) ? (
+                    <Badge>
+                      +{row.guestAdults} guest adults, {row.guestKids} guest kids
+                    </Badge>
+                  ) : null}
                 </>
               }
               actions={
@@ -167,6 +188,8 @@ function OccasionContent({
                   {isDaily ? <Th>Session</Th> : null}
                   <Th align="right">{adultsLabel}</Th>
                   <Th align="right">{kidsLabel}</Th>
+                  {isFoodDay ? <Th align="right">Guest adults</Th> : null}
+                  {isFoodDay ? <Th align="right">Guest children</Th> : null}
                   {showPrasadam ? <Th>Prasadam</Th> : null}
                   {editable || deletable ? <Th align="right">Actions</Th> : null}
                 </tr>
@@ -182,6 +205,8 @@ function OccasionContent({
                     {isDaily ? <Td className="whitespace-nowrap text-muted">{sessionLabel(row) ?? 'N/A'}</Td> : null}
                     <Td align="right" className="tabular-nums text-ink">{row.adults}</Td>
                     <Td align="right" className="tabular-nums text-ink">{row.kids}</Td>
+                    {isFoodDay ? <Td align="right" className="tabular-nums text-muted">{row.guestAdults}</Td> : null}
+                    {isFoodDay ? <Td align="right" className="tabular-nums text-muted">{row.guestKids}</Td> : null}
                     {showPrasadam ? <Td className="text-muted">{row.prasadam || 'N/A'}</Td> : null}
                     {editable || deletable ? (
                       <Td align="right">
@@ -202,7 +227,17 @@ function OccasionContent({
                   <Td align="right" className="font-display font-semibold tabular-nums">
                     {headcount.kids}
                   </Td>
-                  <Td colSpan={(showPrasadam ? 1 : 0) + (editable || deletable ? 1 : 0)} />
+                  {isFoodDay ? (
+                    <Td align="right" className="font-display font-semibold tabular-nums">
+                      {guestHeadcount.adults}
+                    </Td>
+                  ) : null}
+                  {isFoodDay ? (
+                    <Td align="right" className="font-display font-semibold tabular-nums">
+                      {guestHeadcount.kids}
+                    </Td>
+                  ) : null}
+                  <Td colSpan={extraColumns} />
                 </tr>
               </tfoot>
             </>
@@ -230,6 +265,7 @@ function EventIntro() {
       </div>
       <div className="p-4 sm:p-5">
         <h2 className="font-display text-lg font-semibold text-ink">Ganesha Idol Making (Clay)</h2>
+        <p className="mt-1 text-sm font-medium text-brand">{EVENT_DATE_LABEL}</p>
         <p className="mt-1 text-sm text-muted">
           Kids get hands-on with clay to shape their own small Ganesha idol, guided by volunteers.
         </p>

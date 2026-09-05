@@ -5,7 +5,16 @@ import { useRouter } from 'next/navigation';
 import { createRsvp } from '@/lib/actions';
 import { RSVP_SESSIONS, type RsvpOccasion } from '@/lib/schema';
 import { Field, Select } from './form-panel';
-import { DateField, TimeField, FESTIVAL_START_DATE, FESTIVAL_END_DATE, DAILY_POOJA_START_DATE } from './date-time-fields';
+import {
+  DateField,
+  TimeField,
+  FESTIVAL_START_DATE,
+  FESTIVAL_END_DATE,
+  DAILY_POOJA_START_DATE,
+  EVENT_DATE,
+  EVENT_TIME,
+  EVENT_DATE_LABEL,
+} from './date-time-fields';
 import { Modal } from './modal';
 import { useToast } from './toast';
 
@@ -40,8 +49,8 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
     setSession('Morning');
   }
 
-  const adultsLabel = isEvent ? 'Accompanying adults' : isFoodDay ? 'Adults count' : 'Adults';
-  const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Child count' : 'Kids';
+  const adultsLabel = isEvent ? 'Accompanying adults' : isFoodDay ? 'Family adults' : 'Adults';
+  const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Family children' : 'Kids';
   const submitLabel = isFoodDay ? 'Save headcount' : isEvent ? 'Save registration' : 'Save RSVP';
   const savedMessage = isFoodDay ? 'Headcount saved.' : isEvent ? 'Registration saved.' : 'RSVP saved.';
 
@@ -78,6 +87,15 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
               <Field label="Name" name="name" required placeholder="Family or attendee name" span />
               {isFoodDay ? (
                 <input type="hidden" name="date" value={FESTIVAL_END_DATE} />
+              ) : isEvent ? (
+                <>
+                  <input type="hidden" name="date" value={EVENT_DATE} />
+                  <input type="hidden" name="time" value={EVENT_TIME} />
+                  <div className="min-w-0 sm:col-span-2">
+                    <span className="label">Date &amp; time</span>
+                    <p className="field flex items-center text-ink">{EVENT_DATE_LABEL}</p>
+                  </div>
+                </>
               ) : (
                 <DateField
                   label="Date"
@@ -96,6 +114,12 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
               ) : null}
               <Field label={adultsLabel} name="adults" type="number" defaultValue={1} />
               <Field label={kidsLabel} name="kids" type="number" defaultValue={0} />
+              {isFoodDay ? (
+                <>
+                  <Field label="Guest adults" name="guestAdults" type="number" defaultValue={0} />
+                  <Field label="Guest children" name="guestKids" type="number" defaultValue={0} />
+                </>
+              ) : null}
               {showPrasadam ? (
                 <Field
                   label="Prasadam details"

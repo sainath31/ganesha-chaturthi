@@ -56,6 +56,8 @@ function rsvp(overrides: Partial<Rsvp>): Rsvp {
     name: 'Someone',
     adults: 2,
     kids: 0,
+    guestAdults: 0,
+    guestKids: 0,
     session: '',
     time: '',
     prasadam: '',

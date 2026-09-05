@@ -139,6 +139,8 @@ const baseRsvp: Rsvp = {
   name: 'Ram Reddy & Soumya',
   adults: 2,
   kids: 1,
+  guestAdults: 0,
+  guestKids: 0,
   session: 'Evening',
   time: '18:30',
   prasadam: 'Sweets, text 555-123-4567 when you arrive',

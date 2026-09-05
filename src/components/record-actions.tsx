@@ -4,7 +4,16 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal } from './modal';
 import { Field, Select } from './form-panel';
-import { DateField, TimeField, FESTIVAL_START_DATE, FESTIVAL_END_DATE, DAILY_POOJA_START_DATE } from './date-time-fields';
+import {
+  DateField,
+  TimeField,
+  FESTIVAL_START_DATE,
+  FESTIVAL_END_DATE,
+  DAILY_POOJA_START_DATE,
+  EVENT_DATE,
+  EVENT_TIME,
+  EVENT_DATE_LABEL,
+} from './date-time-fields';
 import { useToast } from './toast';
 import { ReceiptInput } from './receipt-input';
 import {
@@ -309,8 +318,8 @@ function RsvpFields({ record }: { record: Rsvp }) {
   const minDate = clamped ? (isDaily ? DAILY_POOJA_START_DATE : isFoodDay ? FESTIVAL_END_DATE : FESTIVAL_START_DATE) : undefined;
   const maxDate = clamped ? (isDaily ? FESTIVAL_END_DATE : isFoodDay ? FESTIVAL_END_DATE : FESTIVAL_START_DATE) : undefined;
 
-  const adultsLabel = isEvent ? 'Accompanying adults' : isFoodDay ? 'Adults count' : 'Adults';
-  const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Child count' : 'Kids';
+  const adultsLabel = isEvent ? 'Accompanying adults' : isFoodDay ? 'Family adults' : 'Adults';
+  const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Family children' : 'Kids';
 
   return (
     <>
@@ -322,14 +331,25 @@ function RsvpFields({ record }: { record: Rsvp }) {
         onChange={(v) => setOccasion(v as typeof occasion)}
       />
       <Field label="Name" name="name" required defaultValue={record.name} />
-      <DateField
-        label="Date"
-        name="date"
-        defaultValue={record.date}
-        minDate={minDate}
-        maxDate={maxDate}
-        onChange={setDate}
-      />
+      {isEvent ? (
+        <>
+          <input type="hidden" name="date" value={EVENT_DATE} />
+          <input type="hidden" name="time" value={EVENT_TIME} />
+          <div className="min-w-0 sm:col-span-2">
+            <span className="label">Date &amp; time</span>
+            <p className="field flex items-center text-ink">{EVENT_DATE_LABEL}</p>
+          </div>
+        </>
+      ) : (
+        <DateField
+          label="Date"
+          name="date"
+          defaultValue={record.date}
+          minDate={minDate}
+          maxDate={maxDate}
+          onChange={setDate}
+        />
+      )}
       {isDaily ? (
         <Select label="Session" name="session" options={sessionsAllowed} value={session} onChange={(v) => setSession(v as typeof session)} />
       ) : null}
@@ -338,6 +358,12 @@ function RsvpFields({ record }: { record: Rsvp }) {
       ) : null}
       <Field label={adultsLabel} name="adults" type="number" defaultValue={record.adults} />
       <Field label={kidsLabel} name="kids" type="number" defaultValue={record.kids} />
+      {isFoodDay ? (
+        <>
+          <Field label="Guest adults" name="guestAdults" type="number" defaultValue={record.guestAdults} />
+          <Field label="Guest children" name="guestKids" type="number" defaultValue={record.guestKids} />
+        </>
+      ) : null}
       {showPrasadam ? <Field label="Prasadam details" name="prasadam" defaultValue={record.prasadam} span /> : null}
       <Field label="Notes" name="notes" defaultValue={record.notes} span />
       {isEvent ? (

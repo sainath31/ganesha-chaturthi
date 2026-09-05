@@ -23,6 +23,10 @@ export const FESTIVAL_START_DATE = '2026-09-14';
 export const FESTIVAL_END_DATE = '2026-09-20';
 /** Daily Pooja runs the day after First Day Pooja through the last day. */
 export const DAILY_POOJA_START_DATE = '2026-09-15';
+/** Ganesha Idol Making is a single fixed session ahead of the festival. */
+export const EVENT_DATE = '2026-09-13';
+export const EVENT_TIME = '16:00';
+export const EVENT_DATE_LABEL = 'Sept 13th 2026, 4PM';
 
 function pad(n: number): string {
   return String(n).padStart(2, '0');
