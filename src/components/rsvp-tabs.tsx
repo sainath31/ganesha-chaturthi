@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { formatDate } from '@/lib/format';
 import { EmptyState, Badge, StatTile } from './ui/primitives';
 import { RsvpForm } from './rsvp-form';
@@ -248,19 +247,21 @@ function OccasionContent({
   );
 }
 
-/** Introduces the Ganesha Idol Making event: the sketch sets the scene, and
+/** Introduces the Ganesha Idol Making event: the video sets the scene, and
  *  the safety note sits right where a parent is about to sign their kids up. */
 function EventIntro() {
   return (
     <div className="card mb-5 overflow-hidden p-0">
       <div className="relative aspect-[21/9] w-full bg-raised">
-        <Image
-          src="/ganesha-clay-making.png"
-          alt="Sketch of kids making a Ganesha idol using clay"
-          fill
-          sizes="(min-width: 640px) 640px, 100vw"
-          className="object-cover"
-          priority={false}
+        <video
+          src="/ganesha-clay-making.mp4"
+          aria-label="Kids making a Ganesha idol using clay"
+          className="h-full w-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          controls
         />
       </div>
       <div className="p-4 sm:p-5">
