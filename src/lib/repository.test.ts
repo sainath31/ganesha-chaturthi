@@ -6,7 +6,6 @@ import {
   byCollector,
   nextReceiptNo,
   newId,
-  foodHeadcount,
   rsvpHeadcount,
 } from './repository';
 import type { Donation, Expense, Rsvp } from './schema';
@@ -23,9 +22,6 @@ function donation(overrides: Partial<Donation>): Donation {
     method: 'Cash',
     collectedBy: '',
     status: 'Paid',
-    votedForFood: 'Yes',
-    foodAdults: 0,
-    foodKids: 0,
     notes: '',
     recordedBy: '',
     recordedAt: '',
@@ -69,20 +65,6 @@ function rsvp(overrides: Partial<Rsvp>): Rsvp {
     ...overrides,
   };
 }
-
-describe('foodHeadcount', () => {
-  it('sums adults and kids across donation rows', () => {
-    const result = foodHeadcount([
-      donation({ foodAdults: 2, foodKids: 1 }),
-      donation({ foodAdults: 3, foodKids: 0 }),
-    ]);
-    expect(result).toEqual({ adults: 5, kids: 1 });
-  });
-
-  it('returns zero for no donations', () => {
-    expect(foodHeadcount([])).toEqual({ adults: 0, kids: 0 });
-  });
-});
 
 describe('rsvpHeadcount', () => {
   it('sums adults and kids across RSVP rows', () => {

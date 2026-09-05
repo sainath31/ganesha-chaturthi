@@ -9,6 +9,13 @@ import { DateField, TimeField, FESTIVAL_START_DATE, FESTIVAL_END_DATE, DAILY_POO
 import { Modal } from './modal';
 import { useToast } from './toast';
 
+const MODAL_TITLE: Record<RsvpOccasion, string> = {
+  'First Day Pooja': 'First Day Pooja RSVP',
+  'Daily Pooja': 'Daily Pooja RSVP',
+  'Ganesha Idol Making': 'Register for Ganesha Idol Making',
+  'Nimarjan Food': 'Nimarjan Food Headcount',
+};
+
 /**
  * Opens in a Modal rather than FormPanel's inline disclosure: this button
  * lives in the RSVP page's sticky tab bar, and an inline form expanding there
@@ -23,12 +30,20 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
   const router = useRouter();
   const toast = useToast();
   const isDaily = occasion === 'Daily Pooja';
+  const isEvent = occasion === 'Ganesha Idol Making';
+  const isFoodDay = occasion === 'Nimarjan Food';
+  const showPrasadam = occasion === 'First Day Pooja' || isDaily;
   // The last day closes before evening — nothing is scheduled that night.
   const sessionsAllowed = date === FESTIVAL_END_DATE ? RSVP_SESSIONS.filter((s) => s === 'Morning') : RSVP_SESSIONS;
 
   if (isDaily && date === FESTIVAL_END_DATE && session !== 'Morning') {
     setSession('Morning');
   }
+
+  const adultsLabel = isEvent ? 'Accompanying adults' : isFoodDay ? 'Adults count' : 'Adults';
+  const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Child count' : 'Kids';
+  const submitLabel = isFoodDay ? 'Save headcount' : isEvent ? 'Save registration' : 'Save RSVP';
+  const savedMessage = isFoodDay ? 'Headcount saved.' : isEvent ? 'Registration saved.' : 'RSVP saved.';
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,7 +56,7 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
       if (result.ok) {
         form.reset();
         setOpen(false);
-        toast('RSVP saved.');
+        toast(savedMessage);
         router.refresh();
       } else {
         setError(result.error);
@@ -52,39 +67,51 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
   return (
     <>
       <button type="button" className="btn-primary shrink-0" onClick={() => setOpen(true)}>
-        + RSVP
+        + {isFoodDay ? 'Headcount' : isEvent ? 'Register' : 'RSVP'}
       </button>
 
       {open ? (
-        <Modal title={`${occasion} RSVP`} onClose={() => setOpen(false)}>
+        <Modal title={MODAL_TITLE[occasion]} onClose={() => setOpen(false)}>
           <form onSubmit={onSubmit}>
             <input type="hidden" name="occasion" value={occasion} />
             <div className="grid gap-4 overflow-x-hidden sm:grid-cols-2">
               <Field label="Name" name="name" required placeholder="Family or attendee name" span />
-              <DateField
-                label="Date"
-                name="date"
-                defaultValue={today}
-                minDate={isDaily ? DAILY_POOJA_START_DATE : FESTIVAL_START_DATE}
-                maxDate={isDaily ? FESTIVAL_END_DATE : FESTIVAL_START_DATE}
-                onChange={setDate}
-              />
+              {isFoodDay ? (
+                <input type="hidden" name="date" value={FESTIVAL_END_DATE} />
+              ) : (
+                <DateField
+                  label="Date"
+                  name="date"
+                  defaultValue={today}
+                  minDate={isDaily ? DAILY_POOJA_START_DATE : occasion === 'First Day Pooja' ? FESTIVAL_START_DATE : undefined}
+                  maxDate={isDaily ? FESTIVAL_END_DATE : occasion === 'First Day Pooja' ? FESTIVAL_START_DATE : undefined}
+                  onChange={setDate}
+                />
+              )}
               {isDaily ? (
                 <Select label="Session" name="session" options={sessionsAllowed} value={session} onChange={(v) => setSession(v as typeof session)} />
               ) : null}
               {isDaily ? (
                 <TimeField label="Time" name="time" autoPeriod={session === 'Morning' ? 'AM' : 'PM'} />
               ) : null}
-              <Field label="Adults" name="adults" type="number" defaultValue={1} />
-              <Field label="Kids" name="kids" type="number" defaultValue={0} />
-              <Field
-                label="Prasadam details"
-                name="prasadam"
-                placeholder="Any prasadam you're signing up to bring"
-                span
-              />
+              <Field label={adultsLabel} name="adults" type="number" defaultValue={1} />
+              <Field label={kidsLabel} name="kids" type="number" defaultValue={0} />
+              {showPrasadam ? (
+                <Field
+                  label="Prasadam details"
+                  name="prasadam"
+                  placeholder="Any prasadam you're signing up to bring"
+                  span
+                />
+              ) : null}
               <Field label="Notes" name="notes" span />
             </div>
+
+            {isEvent ? (
+              <p className="mt-4 rounded-xl border border-brand/20 bg-brand/5 px-3 py-2 text-xs text-muted sm:text-sm">
+                ⚠️ Kids must be accompanied by an adult for the full session.
+              </p>
+            ) : null}
 
             {error ? (
               <p role="alert" className="mt-4 rounded-xl bg-negative/10 px-3 py-2 text-sm text-negative">
@@ -94,7 +121,7 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
 
             <div className="mt-6 flex gap-2">
               <button type="submit" className="btn-primary" disabled={pending}>
-                {pending ? 'Saving…' : 'Save RSVP'}
+                {pending ? 'Saving…' : submitLabel}
               </button>
               <button type="button" className="btn-ghost" onClick={() => setOpen(false)} disabled={pending}>
                 Cancel

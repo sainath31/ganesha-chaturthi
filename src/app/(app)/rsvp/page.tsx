@@ -27,15 +27,9 @@ export default async function RsvpPage({
 
   return (
     <>
-      <PageHeader title="Pooja RSVP" subtitle={`${year} · sign up for either, or both`} />
+      <PageHeader title="RSVP" subtitle={`${year} · pooja sign-ups, kids' events and Nimarjan food`} />
 
-      <RsvpTabs
-        firstDayRows={rows.filter((row) => row.occasion === 'First Day Pooja')}
-        dailyRows={rows.filter((row) => row.occasion === 'Daily Pooja')}
-        editable={editable}
-        deletable={deletable}
-        today={today()}
-      />
+      <RsvpTabs rows={rows} editable={editable} deletable={deletable} today={today()} />
     </>
   );
 }

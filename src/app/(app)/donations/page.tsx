@@ -1,4 +1,4 @@
-import { donationsForYear, totals, foodHeadcount } from '@/lib/repository';
+import { donationsForYear, totals } from '@/lib/repository';
 import { resolveYear } from '@/lib/year';
 import { formatMoney, today } from '@/lib/format';
 import { ViewerNotice, PageHeader, ErrorNotice } from '@/components/ui/primitives';
@@ -30,7 +30,6 @@ export default async function DonationsPage({
     ? [...new Set(rows.map((row) => row.lane).filter(Boolean))].sort()
     : [];
   const summary = totals(rows, []);
-  const food = foodHeadcount(rows);
 
   // Lanes are redacted for public viewers, so the per-lane rollup is only
   // meaningful — and only shown — to signed-in members.
@@ -54,7 +53,6 @@ export default async function DonationsPage({
           `${year}`,
           `${formatMoney(summary.collected)} collected from ${summary.donorCount} families`,
           summary.pledged > 0 ? `${formatMoney(summary.pledged)} pledged` : null,
-          food.adults + food.kids > 0 ? `${food.adults} adults + ${food.kids} kids for food` : null,
         ]
           .filter(Boolean)
           .join(' · ')}

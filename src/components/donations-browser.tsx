@@ -72,15 +72,7 @@ export function DonationsBrowser({
                 .filter(Boolean)
                 .join(' · ')}
               badges={
-                <>
-                  <Badge tone={row.status === 'Paid' ? 'positive' : 'negative'}>{row.status}</Badge>
-                  {row.votedForFood !== 'No response' ? <Badge>Food: {row.votedForFood}</Badge> : null}
-                  {row.foodAdults + row.foodKids > 0 ? (
-                    <Badge>
-                      {row.foodAdults}A + {row.foodKids}K for food
-                    </Badge>
-                  ) : null}
-                </>
+                <Badge tone={row.status === 'Paid' ? 'positive' : 'negative'}>{row.status}</Badge>
               }
               actions={
                 editable || deletable ? (
@@ -99,7 +91,6 @@ export function DonationsBrowser({
                   <Th>Method</Th>
                   <Th align="right">Amount</Th>
                   <Th>Status</Th>
-                  <Th>Food</Th>
                   {editable || deletable ? <Th align="right">Actions</Th> : null}
                 </tr>
               </thead>
@@ -119,7 +110,6 @@ export function DonationsBrowser({
                     <Td>
                       <Badge tone={row.status === 'Paid' ? 'positive' : 'negative'}>{row.status}</Badge>
                     </Td>
-                    <Td className="text-muted">{row.votedForFood}</Td>
                     {editable || deletable ? (
                       <Td align="right">
                         <RecordActions kind="donation" record={row} canEdit={editable} canDelete={deletable} lanes={lanes} />
@@ -138,7 +128,7 @@ export function DonationsBrowser({
                   <Td align="right" className="font-display text-base font-semibold tabular-nums">
                     {formatMoney(shown)}
                   </Td>
-                  <Td colSpan={editable || deletable ? 3 : 2} />
+                  <Td colSpan={editable || deletable ? 2 : 1} />
                 </tr>
               </tfoot>
             </>

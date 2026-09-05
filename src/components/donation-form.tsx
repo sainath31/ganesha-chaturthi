@@ -1,7 +1,7 @@
 'use client';
 
 import { createDonation } from '@/lib/actions';
-import { PAYMENT_METHODS, DONATION_STATUSES, FOOD_RSVP } from '@/lib/schema';
+import { PAYMENT_METHODS, DONATION_STATUSES } from '@/lib/schema';
 import { FormPanel, Field, Select } from './form-panel';
 import { DateField } from './date-time-fields';
 
@@ -30,9 +30,6 @@ export function DonationForm({ today, lanes }: { today: string; lanes: string[] 
       <Select label="Method" name="method" options={PAYMENT_METHODS} />
       <Field label="Collected by" name="collectedBy" placeholder="Committee member who received it" />
       <Select label="Status" name="status" options={DONATION_STATUSES} />
-      <Select label="Voted for food" name="votedForFood" options={FOOD_RSVP} defaultValue="No response" />
-      <Field label="Food adults" name="foodAdults" type="number" defaultValue={0} />
-      <Field label="Food kids" name="foodKids" type="number" defaultValue={0} />
       <Field label="Notes" name="notes" span />
     </FormPanel>
   );

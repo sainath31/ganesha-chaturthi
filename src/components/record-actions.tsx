@@ -19,7 +19,6 @@ import {
 import {
   PAYMENT_METHODS,
   DONATION_STATUSES,
-  FOOD_RSVP,
   EXPENSE_CATEGORIES,
   SETTLEMENT_STATUSES,
   RSVP_OCCASIONS,
@@ -224,14 +223,6 @@ function DonationFields({ record, lanes }: { record: Donation; lanes: string[] }
       <Select label="Method" name="method" options={PAYMENT_METHODS} defaultValue={record.method} />
       <Field label="Collected by" name="collectedBy" defaultValue={record.collectedBy} />
       <Select label="Status" name="status" options={DONATION_STATUSES} defaultValue={record.status} />
-      <Select
-        label="Voted for food"
-        name="votedForFood"
-        options={FOOD_RSVP}
-        defaultValue={record.votedForFood}
-      />
-      <Field label="Food adults" name="foodAdults" type="number" defaultValue={record.foodAdults} />
-      <Field label="Food kids" name="foodKids" type="number" defaultValue={record.foodKids} />
       <Field label="Notes" name="notes" defaultValue={record.notes} span />
     </>
   );
@@ -295,13 +286,17 @@ const FESTIVAL_YEAR = Number(FESTIVAL_START_DATE.slice(0, 4));
 function RsvpFields({ record }: { record: Rsvp }) {
   const [occasion, setOccasion] = useState(record.occasion);
   const isDaily = occasion === 'Daily Pooja';
+  const isEvent = occasion === 'Ganesha Idol Making';
+  const isFoodDay = occasion === 'Nimarjan Food';
+  const showPrasadam = occasion === 'First Day Pooja' || isDaily;
   const [session, setSession] = useState<(typeof RSVP_SESSIONS)[number]>(
     (record.session as (typeof RSVP_SESSIONS)[number]) || 'Morning',
   );
   const [date, setDate] = useState(record.date);
   // Clamping the date to this year's festival window only makes sense while
   // editing a record already in that year — otherwise it silently rewrites a
-  // past year's RSVP onto today's dates.
+  // past year's RSVP onto today's dates. Ganesha Idol Making has no fixed
+  // date at all, so it's never clamped.
   const inCurrentFestivalYear = record.year === FESTIVAL_YEAR;
   // The last day closes before evening — nothing is scheduled that night.
   const sessionsAllowed = date === FESTIVAL_END_DATE ? RSVP_SESSIONS.filter((s) => s === 'Morning') : RSVP_SESSIONS;
@@ -309,6 +304,13 @@ function RsvpFields({ record }: { record: Rsvp }) {
   if (isDaily && date === FESTIVAL_END_DATE && session !== 'Morning') {
     setSession('Morning');
   }
+
+  const clamped = !isEvent && inCurrentFestivalYear;
+  const minDate = clamped ? (isDaily ? DAILY_POOJA_START_DATE : isFoodDay ? FESTIVAL_END_DATE : FESTIVAL_START_DATE) : undefined;
+  const maxDate = clamped ? (isDaily ? FESTIVAL_END_DATE : isFoodDay ? FESTIVAL_END_DATE : FESTIVAL_START_DATE) : undefined;
+
+  const adultsLabel = isEvent ? 'Accompanying adults' : isFoodDay ? 'Adults count' : 'Adults';
+  const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Child count' : 'Kids';
 
   return (
     <>
@@ -324,8 +326,8 @@ function RsvpFields({ record }: { record: Rsvp }) {
         label="Date"
         name="date"
         defaultValue={record.date}
-        minDate={inCurrentFestivalYear ? (isDaily ? DAILY_POOJA_START_DATE : FESTIVAL_START_DATE) : undefined}
-        maxDate={inCurrentFestivalYear ? (isDaily ? FESTIVAL_END_DATE : FESTIVAL_START_DATE) : undefined}
+        minDate={minDate}
+        maxDate={maxDate}
         onChange={setDate}
       />
       {isDaily ? (
@@ -334,10 +336,15 @@ function RsvpFields({ record }: { record: Rsvp }) {
       {isDaily ? (
         <TimeField label="Time" name="time" defaultValue={record.time} autoPeriod={session === 'Morning' ? 'AM' : 'PM'} />
       ) : null}
-      <Field label="Adults" name="adults" type="number" defaultValue={record.adults} />
-      <Field label="Kids" name="kids" type="number" defaultValue={record.kids} />
-      <Field label="Prasadam details" name="prasadam" defaultValue={record.prasadam} span />
+      <Field label={adultsLabel} name="adults" type="number" defaultValue={record.adults} />
+      <Field label={kidsLabel} name="kids" type="number" defaultValue={record.kids} />
+      {showPrasadam ? <Field label="Prasadam details" name="prasadam" defaultValue={record.prasadam} span /> : null}
       <Field label="Notes" name="notes" defaultValue={record.notes} span />
+      {isEvent ? (
+        <p className="text-xs text-muted sm:col-span-2 sm:text-sm">
+          ⚠️ Kids must be accompanied by an adult for the full session.
+        </p>
+      ) : null}
     </>
   );
 }

@@ -16,9 +16,6 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 export const DONATION_STATUSES = ['Paid', 'Pledged', 'Pending'] as const;
 export type DonationStatus = (typeof DONATION_STATUSES)[number];
 
-export const FOOD_RSVP = ['Yes', 'No', 'Not available', 'No response'] as const;
-export type FoodRsvp = (typeof FOOD_RSVP)[number];
-
 export const EXPENSE_CATEGORIES = [
   'Idol',
   'Pooja Items',
@@ -41,10 +38,17 @@ export type SettlementStatus = (typeof SETTLEMENT_STATUSES)[number];
 /**
  * First Day Pooja is the one big sit-down event; Daily Pooja covers every
  * other day of the celebration, each with its own smaller headcount and its
- * own prasadam sign-up. Kept as one sheet with an occasion column rather than
- * two tabs, so a family's RSVPs across the festival are easy to scan together.
+ * own prasadam sign-up. Ganesha Idol Making is a one-off kids' craft event;
+ * Nimarjan Food is a headcount-only sign-up for the immersion day. Kept as
+ * one sheet with an occasion column rather than four tabs' worth of tabs, so
+ * a family's sign-ups across the festival are easy to scan together.
  */
-export const RSVP_OCCASIONS = ['First Day Pooja', 'Daily Pooja'] as const;
+export const RSVP_OCCASIONS = [
+  'First Day Pooja',
+  'Daily Pooja',
+  'Ganesha Idol Making',
+  'Nimarjan Food',
+] as const;
 export type RsvpOccasion = (typeof RSVP_OCCASIONS)[number];
 
 /** Which sitting of a Daily Pooja — not applicable to First Day Pooja, which is one big event. */
@@ -70,10 +74,6 @@ export const donationSchema = z.object({
   /** Committee member who received the money — drives the per-collector reconciliation. */
   collectedBy: text,
   status: z.enum(DONATION_STATUSES).default('Paid'),
-  votedForFood: z.enum(FOOD_RSVP).default('No response'),
-  /** How many from this family are coming for food, split by age — drives catering counts. */
-  foodAdults: headcount,
-  foodKids: headcount,
   notes: text,
   recordedBy: text,
   recordedAt: text,
@@ -174,9 +174,6 @@ export const DONATION_COLUMNS: Record<keyof Donation, string> = {
   method: 'Method',
   collectedBy: 'Collected By',
   status: 'Status',
-  votedForFood: 'Voted For Food',
-  foodAdults: 'Food Adults',
-  foodKids: 'Food Kids',
   notes: 'Notes',
   recordedBy: 'Recorded By',
   recordedAt: 'Recorded At',

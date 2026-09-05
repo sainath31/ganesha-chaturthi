@@ -170,14 +170,6 @@ export async function rsvpsForYear(year: number): Promise<Rsvp[]> {
   return (await listRsvps()).filter((row) => row.year === year);
 }
 
-/** How many are coming for food, split by age — the number catering needs to plan for. */
-export function foodHeadcount(donationRows: Donation[]) {
-  return donationRows.reduce(
-    (acc, row) => ({ adults: acc.adults + row.foodAdults, kids: acc.kids + row.foodKids }),
-    { adults: 0, kids: 0 },
-  );
-}
-
 export function rsvpHeadcount(rsvpRows: Rsvp[]) {
   return rsvpRows.reduce(
     (acc, row) => ({ adults: acc.adults + row.adults, kids: acc.kids + row.kids }),

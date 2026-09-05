@@ -19,7 +19,6 @@ const validDonation = {
   method: 'Cash',
   collectedBy: '',
   status: 'Paid',
-  votedForFood: 'Yes',
   notes: '',
   recordedBy: 'admin@example.com',
   recordedAt: '2026-08-10T10:00:00.000Z',
@@ -67,28 +66,6 @@ describe('donationSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('defaults foodAdults and foodKids to 0 when omitted', () => {
-    const result = donationSchema.safeParse(validDonation);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.foodAdults).toBe(0);
-      expect(result.data.foodKids).toBe(0);
-    }
-  });
-
-  it('coerces string food counts from sheet cells into numbers', () => {
-    const result = donationSchema.safeParse({ ...validDonation, foodAdults: '3', foodKids: '2' });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.foodAdults).toBe(3);
-      expect(result.data.foodKids).toBe(2);
-    }
-  });
-
-  it('rejects a negative food count', () => {
-    const result = donationSchema.safeParse({ ...validDonation, foodAdults: -1 });
-    expect(result.success).toBe(false);
-  });
 });
 
 describe('donationInputSchema', () => {
