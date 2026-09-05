@@ -267,7 +267,7 @@ function EventIntro() {
         <h2 className="font-display text-lg font-semibold text-ink">Ganesha Idol Making (Clay)</h2>
         <p className="mt-1 text-sm font-medium text-brand">{EVENT_DATE_LABEL}</p>
         <p className="mt-1 text-sm text-muted">
-          Kids get hands-on with clay to shape their own small Ganesha idol, guided by volunteers.
+          Kids get hands-on with clay to shape their own small Ganesha idol.
         </p>
         <div className="mt-3 flex items-start gap-2 rounded-xl border border-brand/20 bg-brand/5 p-3">
           <span aria-hidden className="text-base leading-none">⚠️</span>
