@@ -66,7 +66,7 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
 
   return (
     <>
-      <button type="button" className="btn-primary shrink-0" onClick={() => setOpen(true)}>
+      <button type="button" className="btn-primary w-full shrink-0 sm:w-auto" onClick={() => setOpen(true)}>
         + {isFoodDay ? 'Headcount' : isEvent ? 'Register' : 'RSVP'}
       </button>
 

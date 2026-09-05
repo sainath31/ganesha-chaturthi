@@ -58,7 +58,7 @@ export function RsvpTabs({
   return (
     <>
       <div className="sticky top-14 z-20 -mx-4 mb-6 border-b border-line bg-bg/95 px-4 py-3 backdrop-blur-md sm:-mx-0 sm:rounded-xl sm:border sm:px-4">
-        <div className="flex flex-nowrap items-center justify-between gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:items-center sm:justify-between">
           <div className="flex min-w-0 gap-1 overflow-x-auto rounded-lg bg-raised p-1">
             {RSVP_OCCASIONS.map((occasion) => (
               <button
