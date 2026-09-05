@@ -93,8 +93,8 @@ export function RsvpTabs({
 const OCCASION_BLURB: Record<RsvpOccasion, string> = {
   'First Day Pooja': 'The big first-day sit-down, one RSVP per family.',
   'Daily Pooja': 'Please register your family for your preferred morning/evening slot to lead/offer Pooja and bring prasadam to Bappa.',
-  'Ganesha Idol Making': "A kids' craft session — register how many kids (and accompanying adults) are coming.",
-  'Nimarjan Food': 'Headcount for food on Nimarjan (immersion) day — just adults and kids.',
+  'Ganesha Idol Making': "A kids' craft session: register how many kids (and accompanying adults) are coming.",
+  'Nimarjan Food': 'Headcount for food on Nimarjan (immersion) day, just adults and kids.',
 };
 
 function OccasionContent({

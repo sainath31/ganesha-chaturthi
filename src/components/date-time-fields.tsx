@@ -105,7 +105,7 @@ export function DateField({
       <input type="hidden" name={name} value={value} />
       <div className="grid grid-cols-3 gap-2">
         <select
-          aria-label={`${label} — month`}
+          aria-label={`${label} month`}
           className="field min-w-0"
           value={clampedMonth}
           onChange={(event) => setMonth(Number(event.target.value))}
@@ -117,7 +117,7 @@ export function DateField({
           ))}
         </select>
         <select
-          aria-label={`${label} — day`}
+          aria-label={`${label} day`}
           className="field min-w-0"
           value={clampedDay}
           onChange={(event) => setDay(Number(event.target.value))}
@@ -129,7 +129,7 @@ export function DateField({
           ))}
         </select>
         <select
-          aria-label={`${label} — year`}
+          aria-label={`${label} year`}
           className="field min-w-0"
           value={year}
           onChange={(event) => setYear(Number(event.target.value))}
@@ -192,7 +192,7 @@ export function TimeField({
       <input type="hidden" name={name} value={value} />
       <div className="grid grid-cols-3 gap-2">
         <select
-          aria-label={`${label} — hour`}
+          aria-label={`${label} hour`}
           className="field min-w-0"
           value={hour12}
           onChange={(event) => setHour12(Number(event.target.value))}
@@ -204,7 +204,7 @@ export function TimeField({
           ))}
         </select>
         <select
-          aria-label={`${label} — minute`}
+          aria-label={`${label} minute`}
           className="field min-w-0"
           value={minute}
           onChange={(event) => setMinute(Number(event.target.value))}
@@ -216,7 +216,7 @@ export function TimeField({
           ))}
         </select>
         <select
-          aria-label={`${label} — AM or PM`}
+          aria-label={`${label} AM or PM`}
           className="field min-w-0"
           value={period}
           onChange={(event) => {
