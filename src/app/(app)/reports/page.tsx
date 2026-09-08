@@ -28,7 +28,7 @@ export default async function ReportsPage({
     donationRows = rawDonations.map((row) => redactDonation(row, role));
     expenseRows = rawExpenses.map((row) => redactExpense(row, role));
   } catch (error) {
-    return <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />;
+    return <ErrorNotice error={error} />;
   }
 
   const editable = canEdit(role);

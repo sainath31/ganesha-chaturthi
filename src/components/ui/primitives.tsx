@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { describeGoogleError } from '@/lib/google-errors';
 
 export function PageHeader({
   title,
@@ -102,11 +103,17 @@ export function Badge({
   );
 }
 
-export function ErrorNotice({ message }: { message: string }) {
+/**
+ * Takes the raw thrown value rather than a string, so Google's terse codes are
+ * turned into something a committee member can act on instead of "invalid_grant".
+ */
+export function ErrorNotice({ error }: { error: unknown }) {
+  const { title, detail } = describeGoogleError(error);
+
   return (
     <div className="card border-negative/30 bg-negative/5 p-5">
-      <h2 className="font-display text-base font-semibold text-negative">Could not load data</h2>
-      <p className="mt-1.5 whitespace-pre-wrap text-sm text-muted">{message}</p>
+      <h2 className="font-display text-base font-semibold text-negative">{title}</h2>
+      <p className="mt-1.5 whitespace-pre-wrap text-sm text-muted">{detail}</p>
     </div>
   );
 }

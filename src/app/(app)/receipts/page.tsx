@@ -23,7 +23,7 @@ export default async function ReceiptsPage({
   try {
     [rows, expenseRows] = await Promise.all([receiptTable.list(), expensesForYear(year)]);
   } catch (error) {
-    return <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />;
+    return <ErrorNotice error={error} />;
   }
 
   const forYear = rows

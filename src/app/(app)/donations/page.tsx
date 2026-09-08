@@ -23,7 +23,7 @@ export default async function DonationsPage({
   try {
     rows = (await donationsForYear(year)).map((row) => redactDonation(row, role));
   } catch (error) {
-    return <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />;
+    return <ErrorNotice error={error} />;
   }
 
   const lanes = editable

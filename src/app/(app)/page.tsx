@@ -28,7 +28,7 @@ export default async function DashboardPage({
     expenseRows = rawExpenses.map((row) => redactExpense(row, role));
   } catch (error) {
     return (
-      <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />
+      <ErrorNotice error={error} />
     );
   }
 

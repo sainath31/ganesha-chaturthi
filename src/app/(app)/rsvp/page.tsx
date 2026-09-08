@@ -22,7 +22,7 @@ export default async function RsvpPage({
   try {
     rows = (await rsvpsForYear(year)).map((row) => redactRsvp(row, role));
   } catch (error) {
-    return <ErrorNotice message={error instanceof Error ? error.message : 'Unknown error.'} />;
+    return <ErrorNotice error={error} />;
   }
 
   return (

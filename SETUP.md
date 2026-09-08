@@ -53,8 +53,19 @@ Keep both IDs handy.
 1. **APIs & Services → OAuth consent screen**.
 2. Choose **External**, fill in an app name and your email, and save.
 3. Under **Audience**, add your own Google account as a **Test user**.
-   You can leave the app in "Testing" — it never needs verification, because
-   only committee members ever sign in.
+4. **Publish the app.** On the same screen, set the publishing status to
+   **In production**.
+
+> **Do not skip step 4.** While the publishing status is "Testing", Google
+> expires every refresh token after **7 days**. The app then fails with
+> `invalid_grant` about a week after it starts working. Publishing removes that
+> expiry.
+>
+> Google will warn that publishing normally requires verification, because the
+> Sheets scope is classed as sensitive. Verification is only *required* above
+> 100 users, which a neighbourhood committee will never reach. Publish anyway;
+> the only consequence is an "unverified app" screen the first time each person
+> authorises, which you click past via **Advanced → Go to (app name)**.
 
 ### 3c. Create the OAuth client
 
@@ -165,6 +176,42 @@ the header switches between them. The first entry you date in a new year brings
 that year into existence, starting from zero, with past years left untouched.
 
 Receipts land in a per-year subfolder of the Drive folder automatically.
+
+---
+
+## Troubleshooting
+
+### "The Google connection has expired" / `invalid_grant`
+
+The refresh token is no longer accepted. Almost always because the OAuth consent
+screen is still in **Testing**, which expires refresh tokens after 7 days.
+
+Fix it once, properly:
+
+1. **APIs & Services → OAuth consent screen → publishing status → In production.**
+   Confirm past the verification warning.
+2. Mint a fresh refresh token (repeat step 3d above).
+3. Update `GOOGLE_REFRESH_TOKEN` in Vercel → **Settings → Environment Variables**.
+4. **Redeploy.** Vercel only picks up environment changes on a new deployment —
+   editing the variable alone changes nothing on the running site.
+
+Other causes worth checking if it persists:
+
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` in Vercel do not match the client
+  you used in the OAuth Playground. All three values must come from one client.
+- The token was pasted with a trailing space or newline.
+- The Google account's password changed, or you revoked the app's access at
+  <https://myaccount.google.com/permissions>.
+
+### "The spreadsheet or folder was not found"
+
+`SHEET_ID` or `DRIVE_RECEIPTS_FOLDER_ID` holds a whole URL rather than just the
+id from the middle of it.
+
+### "Google refused the request"
+
+Either the Sheets API or the Drive API is not enabled for the project (step 3a),
+or the authorising account cannot edit the sheet or the folder.
 
 ---
 
