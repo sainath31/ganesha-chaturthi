@@ -89,15 +89,18 @@ is shared with them.
    and paste your Client ID and secret.
 3. In the left panel, paste these two scopes into "Input your own scopes":
    ```
-   https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file
+   https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive
    ```
 4. Click **Authorise APIs**, sign in with the account that owns the sheet and
    folder, and allow access.
 5. Click **Exchange authorization code for tokens**.
 6. Copy the **Refresh token**.
 
-> `drive.file` scope means the app can only touch files it creates itself —
-> it cannot read the rest of your Drive.
+> **Why the full `drive` scope and not `drive.file`?** `drive.file` reaches only
+> files the app itself created. The receipts folder is one you make by hand in
+> the Drive UI, so under `drive.file` the app cannot see it: reads and uploads
+> both fail with a 404 that looks exactly like a wrong folder id. The full
+> `drive` scope is what makes a pre-existing folder usable.
 
 ---
 
@@ -202,6 +205,16 @@ Other causes worth checking if it persists:
 - The token was pasted with a trailing space or newline.
 - The Google account's password changed, or you revoked the app's access at
   <https://myaccount.google.com/permissions>.
+
+### Drive fails but Sheets works
+
+Check `/api/health`. If `sheets` is ok and `drive` is not, the refresh token was
+almost certainly minted with the `drive.file` scope. That scope only reaches
+files the app created, so the receipts folder you made by hand is invisible to
+it and every call returns 404 even though the id is right.
+
+Re-mint the token (step 3d) using the full `drive` scope, update
+`GOOGLE_REFRESH_TOKEN` in Vercel, and redeploy.
 
 ### "The spreadsheet or folder was not found"
 
