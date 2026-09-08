@@ -47,3 +47,44 @@ export async function notifyAccessRequest(request: {
     console.error('Failed to send access request notification email:', error);
   }
 }
+
+/**
+ * Alerts the committee when the nightly check finds the Google connection
+ * broken. Deliberately spells out the remedy: the person reading it may be
+ * doing this a year after setup, with no memory of how it was wired together.
+ */
+export async function sendHealthAlert(result: {
+  title?: string;
+  detail?: string;
+  checkedAt: string;
+  checks: { name: string; ok: boolean; detail?: string }[];
+}): Promise<void> {
+  const client = getTransporter();
+  const to = env.accessRequestNotifyEmail ?? env.gmailUser;
+  if (!client || !to) return;
+
+  const failed = result.checks.filter((check) => !check.ok).map((check) => check.name);
+
+  try {
+    await client.sendMail({
+      from: env.gmailUser!,
+      to,
+      subject: `[Ganesha Chaturthi] Site cannot reach Google (${failed.join(', ')})`,
+      text: [
+        result.title ?? 'The Google connection is not working.',
+        '',
+        result.detail ?? '',
+        '',
+        `Checked at: ${result.checkedAt}`,
+        `Failing: ${failed.join(', ')}`,
+        '',
+        'The site is showing an error instead of the accounts until this is fixed.',
+        'Recovery steps are in SETUP.md under Troubleshooting.',
+      ]
+        .filter((line) => line !== null)
+        .join('\n'),
+    });
+  } catch (error) {
+    console.error('Failed to send health alert email:', error);
+  }
+}
