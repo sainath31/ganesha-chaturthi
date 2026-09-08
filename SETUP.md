@@ -89,18 +89,18 @@ is shared with them.
    and paste your Client ID and secret.
 3. In the left panel, paste these two scopes into "Input your own scopes":
    ```
-   https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive
+   https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file
    ```
 4. Click **Authorise APIs**, sign in with the account that owns the sheet and
    folder, and allow access.
 5. Click **Exchange authorization code for tokens**.
 6. Copy the **Refresh token**.
 
-> **Why the full `drive` scope and not `drive.file`?** `drive.file` reaches only
-> files the app itself created. The receipts folder is one you make by hand in
-> the Drive UI, so under `drive.file` the app cannot see it: reads and uploads
-> both fail with a 404 that looks exactly like a wrong folder id. The full
-> `drive` scope is what makes a pre-existing folder usable.
+> `drive.file` means the app can only touch files it creates itself. It cannot
+> read the rest of your Drive, which is why this scope is used rather than full
+> Drive access. Uploading into a folder you made by hand still works: creating
+> files and subfolders inside it is permitted, even though reading that folder's
+> own metadata is not.
 
 ---
 
@@ -208,13 +208,13 @@ Other causes worth checking if it persists:
 
 ### Drive fails but Sheets works
 
-Check `/api/health`. If `sheets` is ok and `drive` is not, the refresh token was
-almost certainly minted with the `drive.file` scope. That scope only reaches
-files the app created, so the receipts folder you made by hand is invisible to
-it and every call returns 404 even though the id is right.
+Check `DRIVE_RECEIPTS_FOLDER_ID` first: it should be just the id from the end of
+the folder URL, not the whole link.
 
-Re-mint the token (step 3d) using the full `drive` scope, update
-`GOOGLE_REFRESH_TOKEN` in Vercel, and redeploy.
+Note that under the `drive.file` scope a 404 on the receipts folder does not by
+itself mean the id is wrong. The app cannot read that folder's metadata, only
+create inside it, so any check that reads the folder directly will 404 while
+uploads work fine.
 
 ### "The spreadsheet or folder was not found"
 

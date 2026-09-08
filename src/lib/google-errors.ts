@@ -31,7 +31,7 @@ const DESCRIPTIONS: Record<string, Described> = {
   insufficient_scope: {
     title: 'The Google token is missing a permission',
     detail:
-      'Re-mint the refresh token with both scopes: spreadsheets and drive.',
+      'Re-mint the refresh token with both scopes: spreadsheets and drive.file.',
   },
 };
 
@@ -45,12 +45,9 @@ const STATUS_DESCRIPTIONS: Record<number, Described> = {
   404: {
     title: 'The spreadsheet or folder was not found',
     detail:
-      'Two causes, in order of likelihood. First: the refresh token was minted with ' +
-      'the drive.file scope, which only reaches files the app itself created, so a ' +
-      'folder made by hand in Drive is invisible to it and returns 404 even when the ' +
-      'id is correct. Re-mint the token with the full drive scope. Second: SHEET_ID or ' +
-      'DRIVE_RECEIPTS_FOLDER_ID holds a whole URL rather than just the id from the ' +
-      'middle of it. See Troubleshooting in SETUP.md.',
+      'Check that SHEET_ID and DRIVE_RECEIPTS_FOLDER_ID hold just the id from the ' +
+      'middle of the Google URL, not the whole link, and that the authorising ' +
+      'account can open both.',
   },
   429: {
     title: 'Google is rate limiting the app',

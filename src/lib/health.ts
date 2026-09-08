@@ -32,7 +32,16 @@ export async function checkGoogleAccess(): Promise<HealthResult> {
   }
 
   try {
-    await driveClient().files.get({ fileId: env.receiptsFolderId, fields: 'id' });
+    // Deliberately a list of the folder's children, not files.get on the folder
+    // itself. Under the drive.file scope the app may create inside a folder it
+    // did not create, but may not read that folder's metadata, so files.get
+    // returns 404 even when uploads work perfectly. Listing proves the token is
+    // valid for Drive and mirrors what ensureYearFolder does on every upload.
+    await driveClient().files.list({
+      q: `'${env.receiptsFolderId}' in parents and trashed = false`,
+      fields: 'files(id)',
+      pageSize: 1,
+    });
     checks.push({ name: 'drive', ok: true });
   } catch (error) {
     firstError ??= error;
