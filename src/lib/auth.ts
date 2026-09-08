@@ -29,8 +29,15 @@ export function canEdit(role: Role): boolean {
   return role === 'admin' || role === 'editor';
 }
 
+/**
+ * Deleting is part of editing, not a step above it. Someone trusted to record
+ * the committee's money is trusted to remove the entry they mistyped a moment
+ * earlier, and the alternative is a volunteer waiting on an admin to undo a
+ * typo. Every row keeps a Recorded By column, and a deleted receipt is only
+ * trashed in Drive, so a mistaken deletion stays recoverable.
+ */
 export function canDelete(role: Role): boolean {
-  return role === 'admin';
+  return canEdit(role);
 }
 
 /**
@@ -90,12 +97,6 @@ export async function requireEditor() {
   if (!canEdit(user.role)) {
     throw new Error('Your account has read-only access. Ask an admin for edit permission.');
   }
-  return user;
-}
-
-export async function requireAdmin() {
-  const user = await requireUser();
-  if (user.role !== 'admin') throw new Error('This action is restricted to committee admins.');
   return user;
 }
 

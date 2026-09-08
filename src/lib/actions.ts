@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { requireEditor, requireAdmin, currentUser, signOut } from './auth';
+import { requireEditor, currentUser, signOut } from './auth';
 import { donations, expenses, receipts, rsvps, accessRequests, newId, nextReceiptNo } from './repository';
 import { yearOf } from './year';
 import { donationInputSchema, expenseInputSchema, rsvpInputSchema, accessRequestInputSchema } from './schema';
@@ -68,7 +68,7 @@ export async function updateDonation(id: string, formData: FormData): Promise<Ac
 
 export async function deleteDonation(id: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    await requireEditor();
     await donations.delete(id);
     revalidatePath('/donations');
     revalidatePath('/');
@@ -165,7 +165,7 @@ export async function updateExpense(id: string, formData: FormData): Promise<Act
 
 export async function deleteExpense(id: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    await requireEditor();
     await expenses.delete(id);
     revalidatePath('/expenses');
     revalidatePath('/');
@@ -210,7 +210,7 @@ export async function uploadReceipts(formData: FormData): Promise<ActionResult> 
 
 export async function deleteReceipt(id: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    await requireEditor();
     const receipt = (await receipts.list()).find((row) => row.id === id);
     if (!receipt) return { ok: false, error: 'That receipt no longer exists.' };
 
@@ -278,7 +278,7 @@ export async function updateRsvp(id: string, formData: FormData): Promise<Action
 
 export async function deleteRsvp(id: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    await requireEditor();
     await rsvps.delete(id);
     revalidatePath('/rsvp');
     return { ok: true };

@@ -59,11 +59,18 @@ describe('canEdit', () => {
 });
 
 describe('canDelete', () => {
-  it('is true only for admin', async () => {
+  it('allows admins and editors, but never viewers', async () => {
     const { canDelete } = await import('./auth');
     expect(canDelete('admin')).toBe(true);
-    expect(canDelete('editor')).toBe(false);
+    expect(canDelete('editor')).toBe(true);
     expect(canDelete('viewer')).toBe(false);
+  });
+
+  it('matches canEdit, so edit rights always carry delete rights', async () => {
+    const { canDelete, canEdit } = await import('./auth');
+    for (const role of ['admin', 'editor', 'viewer'] as const) {
+      expect(canDelete(role)).toBe(canEdit(role));
+    }
   });
 });
 

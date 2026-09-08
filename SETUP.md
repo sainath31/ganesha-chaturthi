@@ -152,14 +152,23 @@ non-commercial use, which a community festival fits.
 
 ## Who can do what
 
-| | View figures | Add / edit | Delete | See receipt images |
-| --- | :---: | :---: | :---: | :---: |
-| Anyone with the link | ✅ | — | — | — |
-| `EDITOR_EMAILS` | ✅ | ✅ | — | ✅ * |
-| `ADMIN_EMAILS` | ✅ | ✅ | ✅ | ✅ |
+| | View figures | Add / edit / delete | See receipt images |
+| --- | :---: | :---: | :---: |
+| Anyone with the link | ✅ | — | — |
+| `EDITOR_EMAILS` | ✅ | ✅ | ✅ * |
+| `ADMIN_EMAILS` | ✅ | ✅ | ✅ |
 
 \* Unless `RECEIPT_VIEWER_EMAILS` is set, which narrows this to those addresses
 plus admins.
+
+Deleting goes with editing rather than sitting above it: whoever records an
+entry can remove the one they mistyped, without waiting on an admin. Every row
+records who last touched it, and deleting a receipt only moves the file to the
+Drive bin, where it stays recoverable for 30 days.
+
+Admins and editors are otherwise identical today. `ADMIN_EMAILS` remains the
+place to list the people who own the setup, and the distinction is kept so a
+future admin-only capability has somewhere to attach.
 
 **Public viewers see redacted data.** Household names are shortened to a first
 name and last initial, lanes and notes are hidden, contact details are stripped,
