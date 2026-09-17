@@ -4,9 +4,11 @@ import { Table, Th, Td } from './ui/table';
 /**
  * Wide financial tables do not survive a 390px viewport — the amount, which is
  * the one column people actually look for, ends up off-screen behind a
- * horizontal scroll. So phones get a stacked card per record and tablets up get
- * the table. Both are rendered server-side from the same rows; only one is ever
- * visible.
+ * horizontal scroll. So phones (and, up through laptop-width windows, tablets)
+ * get a stacked card per record, and only wide desktop screens get the table —
+ * the widest table (admin Expenses, 9 columns) needs close to 1100px to avoid
+ * scrolling sideways within its own card. Both are rendered server-side from
+ * the same rows; only one is ever visible.
  */
 export function ResponsiveRecords({
   cards,
@@ -22,14 +24,14 @@ export function ResponsiveRecords({
 }) {
   return (
     <>
-      <div className="sm:hidden">
+      <div className="xl:hidden">
         <ul className="space-y-3">{cards}</ul>
         <div className="card mt-3 flex items-baseline justify-between p-4">
           <span className="text-sm font-medium text-muted">{count}</span>
           <span className="font-display text-lg font-semibold tabular-nums text-ink">{total}</span>
         </div>
       </div>
-      <div className="hidden sm:block">
+      <div className="hidden xl:block">
         <Table>{table}</Table>
       </div>
     </>

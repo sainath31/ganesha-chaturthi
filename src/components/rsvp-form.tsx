@@ -53,9 +53,10 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
   const kidsLabel = isEvent ? 'Kids attending' : isFoodDay ? 'Family children' : 'Kids';
   const submitLabel = isFoodDay ? 'Save headcount' : isEvent ? 'Save registration' : 'Save RSVP';
   const savedMessage = isFoodDay ? 'Headcount saved.' : isEvent ? 'Registration saved.' : 'RSVP saved.';
-  // First Day Pooja and the Ganesha Idol Making event are handled by the
-  // organizers directly rather than through self-service sign-up.
-  const signupClosed = occasion === 'First Day Pooja' || isEvent;
+  // First Day Pooja, the Ganesha Idol Making event, and the Nimarjan Food
+  // headcount are all handled by the organizers directly rather than
+  // through self-service sign-up.
+  const signupClosed = occasion === 'First Day Pooja' || isEvent || isFoodDay;
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,7 +86,7 @@ export function RsvpForm({ today, occasion }: { today: string; occasion: RsvpOcc
           className="btn-primary w-full shrink-0 opacity-50 sm:w-auto"
           title="Please reach out to organizers for help."
         >
-          + {isEvent ? 'Register' : 'RSVP'}
+          + {isFoodDay ? 'Headcount' : isEvent ? 'Register' : 'RSVP'}
         </button>
         <p className="text-right text-xs text-muted">Please reach out to organizers for help.</p>
       </div>
